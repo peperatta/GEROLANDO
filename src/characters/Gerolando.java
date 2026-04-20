@@ -75,9 +75,13 @@ public class Gerolando {
         return base - (arma + armadura);
     }
     public int getAtaque(){
+        usarItem(armaEquipada);
         int base = fuerza;
         int arma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;
         return base + arma;
+    }
+    public String getTipoAtaque(){
+        return armaEquipada.tipo;
     }
     public int getDefensa(){
         return (armaduraEquipada != null) ? armaduraEquipada.getDefensa() : 0;

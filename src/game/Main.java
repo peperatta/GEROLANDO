@@ -41,11 +41,11 @@ public class Main {
         Gerolando gerolando = new Gerolando();
         gerolando.inventario.agregar(espadaHierro);
         gerolando.inventario.agregar(RopaVieja);
-        gerolando.usarItem(RopaVieja);
-        gerolando.usarItem(espadaHierro);
-        gerolando.usarItem(espadaHierro);
-        System.out.println("Vida actual: " + gerolando.vidaActual);
+        gerolando.equiparArmadura(RopaVieja);
+        gerolando.equiparArma(espadaHierro);
         System.out.println(gerolando.getVelocidad());
+        finko.recibirAtaque(gerolando);
+        finko.recibirAtaque(gerolando);
 
     }
 }

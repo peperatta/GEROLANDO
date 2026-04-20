@@ -20,6 +20,7 @@ public class Enemigo {
             this.defensa = defensa;
             this.spritePath = spritePath;
             this.velocidad = velocidad;
+            this.debilidad = debilidad;
         }
         //Getters
         public int getVida() {
@@ -34,8 +35,8 @@ public class Enemigo {
         public int getDefensa() {
             return defensa;
         }
-        public void recibirAtaque(Arma arma) {
-            int dano = arma.getAtaque() - this.defensa;
+        public void recibirAtaque(Gerolando gerolando) {
+            int dano = gerolando.getAtaque() - this.defensa;
             if (dano <= 0) {
                 System.out.println(nombre + " bloqueó el ataque.");
                 return;
@@ -43,7 +44,7 @@ public class Enemigo {
 
             int danoTotal = dano;
 
-            if (Objects.equals(this.debilidad, arma.tipo)) {
+            if (Objects.equals(this.debilidad, gerolando.getTipoAtaque())) {
                 danoTotal += 3;
                 System.out.println(nombre + " recibió " + danoTotal + " de daño por su debilidad. Vida restante: " + (vida - danoTotal));
             } else {
