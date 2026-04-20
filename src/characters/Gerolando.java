@@ -74,8 +74,20 @@ public class Gerolando {
         int armadura = (armaduraEquipada != null) ? armaduraEquipada.getPeso() : 0;
         return base - (arma + armadura);
     }
+    public void atacar(Enemigo enemigo) {
+        int danoBase = this.getAtaque();
+
+        boolean critico = Math.random() < 0.2;
+        if (critico) {
+            danoBase *= 2;
+            System.out.println("¡Golpe crítico!");
+        }
+
+        System.out.println("Gerolando ataque de tipo " + getTipoAtaque()+" con "+ this.armaEquipada.getNombre());
+
+        enemigo.recibirAtaque(danoBase, this.getTipoAtaque());
+    }
     public int getAtaque(){
-        usarItem(armaEquipada);
         int base = fuerza;
         int arma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;
         return base + arma;
@@ -89,6 +101,8 @@ public class Gerolando {
     public void recibirAtaque(int dano) {
         int reducido = Math.max(0, dano - getDefensa());
         vidaActual -= reducido;
+
+        System.out.println("Gerolando recibió " + reducido + " de daño. Vida actual: " + vidaActual);
 
         if (vidaActual < 0) {
             vidaActual = 0;

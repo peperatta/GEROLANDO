@@ -7,6 +7,7 @@ import java.util.Objects;
 public class Enemigo {
         public String nombre;
         private int vida;
+        public int vidaActual;
         private int ataque;
         private int defensa;
         private int velocidad;
@@ -16,6 +17,7 @@ public class Enemigo {
         public Enemigo(String nombre, int vida, int ataque, int defensa, String spritePath, int velocidad, String debilidad) {
             this.nombre = nombre;
             this.vida = vida;
+            this.vidaActual = vida;
             this.ataque = ataque;
             this.defensa = defensa;
             this.spritePath = spritePath;
@@ -35,31 +37,37 @@ public class Enemigo {
         public int getDefensa() {
             return defensa;
         }
-        public void recibirAtaque(Gerolando gerolando) {
-            int dano = gerolando.getAtaque() - this.defensa;
-            if (dano <= 0) {
+        public void recibirAtaque(int dano, String tipoAtaque) {
+
+            int danoReducido = dano - this.defensa;
+
+            if (danoReducido <= 0) {
                 System.out.println(nombre + " bloqueó el ataque.");
                 return;
             }
 
-            int danoTotal = dano;
+            int danoTotal = danoReducido;
 
-            if (Objects.equals(this.debilidad, gerolando.getTipoAtaque())) {
+            if (Objects.equals(this.debilidad, tipoAtaque)) {
                 danoTotal += 3;
-                System.out.println(nombre + " recibió " + danoTotal + " de daño por su debilidad. Vida restante: " + (vida - danoTotal));
-            } else {
-                System.out.println(nombre + " recibió " + danoTotal + " de daño. Vida restante: " + (vida - danoTotal));
+                System.out.println(nombre + " es débil a " + tipoAtaque + "!");
             }
 
-            this.vida -= danoTotal;
+            this.vidaActual -= danoTotal;
+
+            if (this.vidaActual < 0) {
+                this.vidaActual = 0;
+            }
+
+            System.out.println(nombre + " recibió " + danoTotal + " de daño. Vida restante: " + this.vidaActual);
         }
         public void atacar(Gerolando gerolando) {
-            int dano = this.ataque - gerolando.getDefensa();
+            int dano = this.ataque;
             if (dano <= 0) {
                 System.out.println(nombre + " atacó pero no causó daño.");
                 return;
             }
-            System.out.println(nombre + " atacó y causó " + dano + " de daño a Gerolando");
+            System.out.println(nombre + " hizo un ataque de " + dano + " de daño");
             gerolando.recibirAtaque(dano);
         }
 }

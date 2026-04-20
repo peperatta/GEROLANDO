@@ -35,17 +35,16 @@ public class Main {
 
         // Crear items
         Arma espadaHierro = factory.crear("espada_hierro");
-        Armadura RopaVieja = armaduraFactory.crear("pecho_acero");
+        Armadura RopaVieja = armaduraFactory.crear("ropa_vieja");
         Enemigo finko = enemigoFactory.crear("finko");
+
 
         Gerolando gerolando = new Gerolando();
         gerolando.inventario.agregar(espadaHierro);
         gerolando.inventario.agregar(RopaVieja);
         gerolando.equiparArmadura(RopaVieja);
         gerolando.equiparArma(espadaHierro);
-        System.out.println(gerolando.getVelocidad());
-        finko.recibirAtaque(gerolando);
-        finko.recibirAtaque(gerolando);
+        Combate.iniciarCombate(gerolando, finko);
 
     }
 }
