@@ -1,0 +1,13 @@
+[
+  {
+    "id": "finko",
+    "nombre": "Finko",
+    "vida": 30,
+    "ataque": 5,
+    "defensa": 2,
+    "velocidad": 6,
+    "debilidad": "magica",
+    "spritePath": "src/assets/sprites/enemigos/finko.png"
+  }
+]
+

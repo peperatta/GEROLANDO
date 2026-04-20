@@ -26,7 +26,7 @@ public class ArmaLoader {
                     listType
             );
 
-            // Convertimos lista → mapa por ID
+            // Convertimos lista a mapa por ID
             for (DatosArma arma : lista) {
                 catalogo.put(arma.id, arma);
             }

@@ -1,10 +1,14 @@
 package game;
 
+import characters.Enemigo;
 import characters.Gerolando;
 import data.factory.ArmaFactory;
 import data.factory.ArmaduraFactory;
+import data.factory.EnemigoFactory;
 import data.loader.ArmaduraLoader;
+import data.loader.EnemigoLoader;
 import data.model.DatosArmadura;
+import data.model.DatosEnemigo;
 import items.*;
 
 import data.loader.ArmaLoader;
@@ -21,16 +25,18 @@ public class Main {
                 ArmaLoader.cargar("src/assets/data/armas.json");
         Map<String, DatosArmadura> catalogoArmadura =
                 ArmaduraLoader.cargar("src/assets/data/armaduras.json");
+        Map<String, DatosEnemigo> catalogoEnemigo =
+                EnemigoLoader.cargar("src/assets/data/enemigos.json");
 
-        // Obtener un item por ID
-        DatosArma arma = catalogoArma.get("espada_hierro");
-        ArmaFactory factory= new ArmaFactory(catalogoArma);
-        Arma espadaHierro = factory.crear("espada_hierro");
-
-        // Obtener armadura por ID
-        DatosArmadura armadura = catalogoArmadura.get("ropa_vieja");
+        // Crear factories
+        ArmaFactory factory = new ArmaFactory(catalogoArma);
         ArmaduraFactory armaduraFactory = new ArmaduraFactory(catalogoArmadura);
-        Armadura RopaVieja = armaduraFactory.crear("ropa_vieja");
+        EnemigoFactory enemigoFactory = new EnemigoFactory(catalogoEnemigo);
+
+        // Crear items
+        Arma espadaHierro = factory.crear("espada_hierro");
+        Armadura RopaVieja = armaduraFactory.crear("pecho_acero");
+        Enemigo finko = enemigoFactory.crear("finko");
 
         Gerolando gerolando = new Gerolando();
         gerolando.inventario.agregar(espadaHierro);

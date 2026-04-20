@@ -11,6 +11,7 @@ public class Gerolando {
     public int fuerza;
     public int magia;
     public int velocidad;
+    private int xp;
 
     //Porcentajes
     public int manaMax, manaActual;
@@ -24,6 +25,7 @@ public class Gerolando {
     //Constructor
     public Gerolando(){
         this.vidaMax = 100;
+        this.xp = 0;
         this.vidaActual = vidaMax;
         this.nivel = 1;
         this.fuerza = 5;
@@ -80,7 +82,7 @@ public class Gerolando {
     public int getDefensa(){
         return (armaduraEquipada != null) ? armaduraEquipada.getDefensa() : 0;
     }
-    public void recibirDano(int dano) {
+    public void recibirAtaque(int dano) {
         int reducido = Math.max(0, dano - getDefensa());
         vidaActual -= reducido;
 
