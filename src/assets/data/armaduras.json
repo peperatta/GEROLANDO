@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ropa_vieja",
+    "nombre": "Ropa Vieja",
+    "defensa": 1
+  },
+  {
+    "id": "pecho_acero",
+    "nombre": "Coraza de Acero",
+    "defensa": 5
+  },
+  {
+    "id": "madre_santa",
+    "nombre": "Armadura Misteriosa",
+    "defensa": 9
+  }
+]
+
