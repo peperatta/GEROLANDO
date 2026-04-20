@@ -5,4 +5,5 @@ public class DatosArma {
     public String nombre;
     public String tipo;
     public int ataque;
+    public int peso;
 }

@@ -1,8 +1,8 @@
 package items;
 
 public class ArmaRango extends Arma{
-    public ArmaRango(String nombre, int ataque){
-        super(nombre, ataque);
+    public ArmaRango(String nombre, int ataque, int peso){
+        super(nombre, ataque, peso);
 
     }
 

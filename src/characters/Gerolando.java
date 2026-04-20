@@ -6,13 +6,14 @@ import items.Item;
 
 public class Gerolando {
 //ATRIBUTOS
-    int vidaMax, vidaActual;
-    int nivel;
-    int fuerza;
-    int magia;
+    public int vidaMax, vidaActual;
+    public int nivel;
+    public int fuerza;
+    public int magia;
+    public int velocidad;
 
     //Porcentajes
-    int manaMax, manaActual;
+    public int manaMax, manaActual;
 
     //Inventario
     private Arma armaEquipada;
@@ -27,6 +28,7 @@ public class Gerolando {
         this.nivel = 1;
         this.fuerza = 5;
         this.magia = 5;
+        this.velocidad = 20;
 
         this.manaMax = 3;
         this.manaActual = manaMax;
@@ -64,6 +66,11 @@ public class Gerolando {
     }
 
     //Combate
+    public int getVelocidad(){
+        int base = velocidad;
+        int arma = (armaEquipada != null) ? armaEquipada.getPeso() : 0;
+        return base - arma;
+    }
     public int getAtaque(){
         int base = fuerza;
         int arma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="/Arma (snapshot).java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/Arma (snapshot).java" />
+              <option name="originalContent" value="package items;&#10;&#10;public abstract class Arma extends Item {&#10;&#10;    private int ataque;&#10;    private int peso;&#10;&#10;    public Arma(String nombre, int ataque, int peso) {&#10;        super(nombre);&#10;        this.ataque = ataque;&#10;        this.peso = peso;&#10;    }&#10;&#10;    public int getAtaque() {&#10;        return ataque;&#10;    }&#10;    public int getPeso() {&#10;        return peso;&#10;    }&#10;&#10;    public abstract void usar();&#10;}" />
+              <option name="updatedContent" value="package items;&#10;&#10;public abstract class Arma extends Item {&#10;&#10;    private int ataque;&#10;    private int peso;&#10;&#10;    public Arma(String nombre, int ataque, int peso) {&#10;        super(nombre);&#10;        this.ataque = ataque;&#10;        this.peso = peso;&#10;    }&#10;&#10;    public int getAtaque() {&#10;        return ataque;&#10;    }&#10;&#10;    public int getPeso() {&#10;        return peso;&#10;    }&#10;&#10;    public abstract void usar();&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

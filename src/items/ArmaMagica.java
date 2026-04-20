@@ -1,8 +1,8 @@
 package items;
 
 public class ArmaMagica extends Arma{
-    public ArmaMagica(String nombre, int ataque){
-        super(nombre, ataque);
+    public ArmaMagica(String nombre, int ataque, int peso){
+        super(nombre, ataque, peso);
 
     }
 

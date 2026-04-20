@@ -16,13 +16,13 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // 1. Cargar catálogo desde JSON
+        // Cargar catálogo desde JSON
         Map<String, DatosArma> catalogoArma =
                 ArmaLoader.cargar("src/assets/data/armas.json");
         Map<String, DatosArmadura> catalogoArmadura =
                 ArmaduraLoader.cargar("src/assets/data/armaduras.json");
 
-        // 2. Obtener un arma por ID
+        // Obtener un item por ID
         DatosArma arma = catalogoArma.get("espada_hierro");
         ArmaFactory factory= new ArmaFactory(catalogoArma);
         Arma espadaHierro = factory.crear("espada_hierro");
@@ -38,6 +38,8 @@ public class Main {
         gerolando.usarItem(RopaVieja);
         gerolando.usarItem(espadaHierro);
         gerolando.usarItem(espadaHierro);
+        System.out.println("Vida actual: " + gerolando.vidaActual);
+        System.out.println(gerolando.getVelocidad());
 
     }
 }

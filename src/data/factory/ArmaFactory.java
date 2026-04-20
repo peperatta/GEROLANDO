@@ -22,13 +22,13 @@ public class ArmaFactory {
 
         switch (d.tipo) {
             case "melee":
-                return new ArmaMelee(d.nombre, d.ataque);
+                return new ArmaMelee(d.nombre, d.ataque, d.peso);
 
             case "rango":
-                return new ArmaRango(d.nombre, d.ataque);
+                return new ArmaRango(d.nombre, d.ataque, d.peso);
 
             case "magica":
-                return new ArmaMagica(d.nombre, d.ataque);
+                return new ArmaMagica(d.nombre, d.ataque, d.peso);
 
             default:
                 throw new RuntimeException("Tipo inválido");
