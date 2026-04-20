@@ -5,5 +5,6 @@ public class DatosArmadura {
     public String nombre;
     public int defensa;
     public int peso;
+    public String spritePath;
 }
 

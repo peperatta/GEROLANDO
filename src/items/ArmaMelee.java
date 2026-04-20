@@ -1,8 +1,8 @@
 package items;
 
 public class ArmaMelee extends Arma{
-    public ArmaMelee(String nombre, int ataque, int peso){
-        super(nombre, ataque, peso);
+    public ArmaMelee(String nombre, int ataque, int peso, String spritePath){
+        super(nombre, ataque, peso, spritePath);
 
     }
 
