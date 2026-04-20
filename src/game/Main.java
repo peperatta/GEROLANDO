@@ -16,7 +16,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Cargar catálogo desde JSON
+        // Cargar catálogos desde JSON
         Map<String, DatosArma> catalogoArma =
                 ArmaLoader.cargar("src/assets/data/armas.json");
         Map<String, DatosArmadura> catalogoArmadura =

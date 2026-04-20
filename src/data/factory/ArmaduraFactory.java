@@ -21,7 +21,7 @@ public class ArmaduraFactory {
             throw new RuntimeException("Armadura no encontrada: " + id);
         }
 
-        return new Armadura(d.nombre, d.defensa);
+        return new Armadura(d.nombre, d.defensa, d.peso);
     }
 }
 

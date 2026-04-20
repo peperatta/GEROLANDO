@@ -2,17 +2,20 @@
   {
     "id": "ropa_vieja",
     "nombre": "Ropa Vieja",
-    "defensa": 1
+    "defensa": 1,
+    "peso": 1
   },
   {
     "id": "pecho_acero",
     "nombre": "Coraza de Acero",
-    "defensa": 5
+    "defensa": 5,
+    "peso": 4
   },
   {
     "id": "madre_santa",
     "nombre": "Armadura Misteriosa",
-    "defensa": 9
+    "defensa": 9,
+    "peso": 1
   }
 ]
 

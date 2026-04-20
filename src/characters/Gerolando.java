@@ -69,7 +69,8 @@ public class Gerolando {
     public int getVelocidad(){
         int base = velocidad;
         int arma = (armaEquipada != null) ? armaEquipada.getPeso() : 0;
-        return base - arma;
+        int armadura = (armaduraEquipada != null) ? armaduraEquipada.getPeso() : 0;
+        return base - (arma + armadura);
     }
     public int getAtaque(){
         int base = fuerza;
