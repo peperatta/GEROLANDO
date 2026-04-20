@@ -8,6 +8,6 @@ public class ArmaMelee extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Ataque cuerpo a cuerpo con " + nombre);
+        System.out.println("Ataque cuerpo a cuerpo " + "de " + this.getAtaque() +" con: "+ nombre );
     }
 }

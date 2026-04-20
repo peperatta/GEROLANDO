@@ -46,16 +46,20 @@ public class Gerolando {
 
         if (item == null) return;
 
-        item.usar();
-
-        if (item instanceof Arma) {
-            equiparArma((Arma) item);
-            System.out.println("Equipaste el arma: " + item.getNombre());
+        if (item instanceof Arma ) {
+            if (armaEquipada == null || !armaEquipada.equals(item)) {
+                equiparArma((Arma) item);
+                System.out.println("Equipaste el arma: " + item.getNombre());
+            }
+            else{item.usar();}
         }
 
         if (item instanceof Armadura) {
-            equiparArmadura((Armadura) item);
-            System.out.println("Equipaste la armadura: " + item.getNombre());
+            if (armaduraEquipada == null || !armaduraEquipada.equals(item)) {
+                equiparArmadura((Armadura) item);
+                System.out.println("Equipaste la armadura: " + item.getNombre());
+            }
+            else{item.usar();}
         }
     }
 

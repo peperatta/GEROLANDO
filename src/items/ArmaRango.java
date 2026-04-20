@@ -8,6 +8,6 @@ public class ArmaRango extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Ataque a distancia con " + nombre);
+        System.out.println("Ataque a distancia " + "de " + this.getAtaque() +" con: "+ nombre );
     }
 }

@@ -8,6 +8,6 @@ public class ArmaMagica extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Ataque magico con: " + nombre);
+        System.out.println("Ataque magico " + "de " + this.getAtaque() +" con: "+ nombre );
     }
 }

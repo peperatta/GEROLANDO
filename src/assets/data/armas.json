@@ -1,0 +1,8 @@
+[
+  {
+    "id": "espada_hierro",
+    "nombre": "Espada de Hierro Antigua",
+    "tipo": "melee",
+    "ataque": 10
+  }
+]
