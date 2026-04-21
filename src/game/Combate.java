@@ -2,8 +2,6 @@ package game;
 
 import characters.Enemigo;
 import characters.Gerolando;
-import items.Arma;
-import items.Armadura;
 import items.Item;
 
 import java.util.Scanner;
@@ -43,45 +41,64 @@ public class Combate {
     }
 
     private static void turnoJugador(Gerolando jugador, Enemigo enemigo) {
-        System.out.println("Turno de Gerolando");
-        System.out.println("1. Atacar");
-        System.out.println("2. Inventario");
-        System.out.println("3. Ver estado");
-        System.out.print("Elige una opción: ");
+        boolean accionRealizada = false;
+
+        while (!accionRealizada) {
+            System.out.println("Turno de Gerolando");
+            System.out.println("1. Atacar");
+            System.out.println("2. Inventario");
+            System.out.println("3. Ver estado");
+            System.out.print("Elige una opción: ");
+
+            int opcion = scanner.nextInt();
+
+            switch (opcion) {
+                case 1:
+                    jugador.atacar(enemigo);
+                    accionRealizada = true;
+                    break;
+
+                case 2:
+                    accionRealizada = manejarInventarioEnCombate(jugador);
+                    break;
+
+                case 3:
+                    jugador.imprimirEstado();
+                    break;
+
+                default:
+                    System.out.println("Opción no válida.");
+            }
+        }
+    }
+
+    private static boolean manejarInventarioEnCombate(Gerolando jugador) {
+        if (jugador.inventario.size() == 0) {
+            System.out.println("El inventario está vacío.");
+            return false;
+        }
+
+        System.out.println("\n=== INVENTARIO ===");
+        jugador.inventario.mostrarInventario();
+        System.out.println("0. Cancelar");
+        System.out.print("Selecciona un item por número para usar/equipar: ");
 
         int opcion = scanner.nextInt();
 
-        switch (opcion) {
-            case 1:
-                jugador.atacar(enemigo);
-                break;
+        if (opcion == 0) {
+            System.out.println("Regresando al menú de combate...");
+            return false;
+        }
 
-            case 2:
-                jugador.inventario.mostrarInventario();
-                System.out.print("Selecciona un item por número: ");
-                int itemIndex = scanner.nextInt() - 1;
+        int itemIndex = opcion - 1;
 
-                if (itemIndex >= 0 && itemIndex < jugador.inventario.size()) {
-                    Item item = jugador.inventario.getItems().get(itemIndex);
-
-                    if (item instanceof Arma) {
-                        jugador.equiparArma((Arma) item);
-                    } else if (item instanceof Armadura) {
-                        jugador.equiparArmadura((Armadura) item);
-                    } else {
-                        jugador.usarItem(item);
-                    }
-                } else {
-                    System.out.println("Índice de item no válido.");
-                }
-                break;
-
-            case 3:
-                jugador.imprimirEstado();
-                break;
-
-            default:
-                System.out.println("Opción no válida. Se pierde el turno.");
+        if (itemIndex >= 0 && itemIndex < jugador.inventario.size()) {
+            Item item = jugador.inventario.getItems().get(itemIndex);
+            jugador.usarItem(item);
+            return true; // usar/equipar sí consume el turno
+        } else {
+            System.out.println("Índice de item no válido.");
+            return false;
         }
     }
 

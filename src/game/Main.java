@@ -1,18 +1,17 @@
 package game;
 
-import characters.Enemigo;
 import characters.Gerolando;
 import data.factory.ArmaFactory;
 import data.factory.ArmaduraFactory;
 import data.factory.EnemigoFactory;
+import data.loader.ArmaLoader;
 import data.loader.ArmaduraLoader;
 import data.loader.EnemigoLoader;
+import data.model.DatosArma;
 import data.model.DatosArmadura;
 import data.model.DatosEnemigo;
-import items.*;
-
-import data.loader.ArmaLoader;
-import data.model.DatosArma;
+import items.Arma;
+import items.Armadura;
 
 import java.util.Map;
 
@@ -36,17 +35,18 @@ public class Main {
         // Crear items
         Arma espadaHierro = factory.crear("espada_hierro");
         Arma espadaMadera = factory.crear("espada_madera");
-        Armadura RopaVieja = armaduraFactory.crear("ropa_vieja");
-        Enemigo finko = enemigoFactory.crear("finko");
-
+        Armadura ropaVieja = armaduraFactory.crear("ropa_vieja");
 
         Gerolando gerolando = new Gerolando();
+
         gerolando.inventario.agregar(espadaHierro);
         gerolando.inventario.agregar(espadaMadera);
-        gerolando.inventario.agregar(RopaVieja);
-        gerolando.equiparArmadura(RopaVieja);
-        gerolando.equiparArma(espadaHierro);
-        Combate.iniciarCombate(gerolando, finko);
+        gerolando.inventario.agregar(ropaVieja);
 
+        gerolando.equiparArmadura(ropaVieja);
+        gerolando.equiparArma(espadaHierro);
+
+        GameEngine engine = new GameEngine(gerolando, enemigoFactory);
+        engine.start();
     }
 }
