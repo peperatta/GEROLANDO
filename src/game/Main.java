@@ -47,7 +47,6 @@ public class Main {
         gerolando.equiparArmadura(RopaVieja);
         gerolando.equiparArma(espadaHierro);
         Combate.iniciarCombate(gerolando, finko);
-        System.out.println(gerolando.getXP());
 
     }
 }

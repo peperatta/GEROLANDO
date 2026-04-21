@@ -1,5 +1,6 @@
 package characters;
 
+import characters.equipment.EquipmentSystem;
 import game.progression.ProgressionSystem;
 import items.Arma;
 import items.Armadura;
@@ -15,12 +16,11 @@ public class Gerolando {
     public int manaMax, manaActual;
 
     // Inventario
-    private Arma armaEquipada;
-    private Armadura armaduraEquipada;
     public Inventario inventario;
 
-    // Sistema de progresión
+    // Sistemas
     private ProgressionSystem progressionSystem;
+    private EquipmentSystem equipmentSystem;
 
     // CONSTRUCTOR
     public Gerolando() {
@@ -34,7 +34,9 @@ public class Gerolando {
         this.manaActual = manaMax;
 
         this.inventario = new Inventario();
+
         this.progressionSystem = new ProgressionSystem();
+        this.equipmentSystem = new EquipmentSystem();
     }
 
     // =========================
@@ -77,52 +79,46 @@ public class Gerolando {
     // EQUIPO
     // =========================
     public void equiparArma(Arma arma) {
-        this.armaEquipada = arma;
-        System.out.println("Equipaste el arma: " + arma.getNombre());
+        equipmentSystem.equiparArma(arma);
     }
 
     public void equiparArmadura(Armadura armadura) {
-        this.armaduraEquipada = armadura;
-        System.out.println("Equipaste la armadura: " + armadura.getNombre());
+        equipmentSystem.equiparArmadura(armadura);
     }
 
     public void usarItem(Item item) {
-        if (item == null) return;
-
-        if (item instanceof Arma) {
-            if (armaEquipada == null || !armaEquipada.equals(item)) {
-                equiparArma((Arma) item);
-            } else {
-                item.usar();
-            }
-            return;
-        }
-
-        if (item instanceof Armadura) {
-            if (armaduraEquipada == null || !armaduraEquipada.equals(item)) {
-                equiparArmadura((Armadura) item);
-            } else {
-                item.usar();
-            }
-        }
+        equipmentSystem.usarItem(item);
     }
 
     public Arma getArmaEquipada() {
-        return armaEquipada;
+        return equipmentSystem.getArmaEquipada();
     }
 
     public Armadura getArmaduraEquipada() {
-        return armaduraEquipada;
+        return equipmentSystem.getArmaduraEquipada();
+    }
+
+    public EquipmentSystem getEquipmentSystem() {
+        return equipmentSystem;
     }
 
     // =========================
     // COMBATE
     // =========================
     public int getVelocidad() {
-        int base = velocidad;
-        int pesoArma = (armaEquipada != null) ? armaEquipada.getPeso() : 0;
-        int pesoArmadura = (armaduraEquipada != null) ? armaduraEquipada.getPeso() : 0;
-        return base - (pesoArma + pesoArmadura);
+        return velocidad - equipmentSystem.getPenalizacionPeso();
+    }
+
+    public int getAtaque() {
+        return fuerza + equipmentSystem.getAtaqueBonus();
+    }
+
+    public int getDefensa() {
+        return equipmentSystem.getDefensaBonus();
+    }
+
+    public String getTipoAtaque() {
+        return equipmentSystem.getTipoAtaque();
     }
 
     public void atacar(Enemigo enemigo) {
@@ -134,29 +130,12 @@ public class Gerolando {
             System.out.println("¡Golpe crítico!");
         }
 
-        String tipoAtaque = getTipoAtaque();
+        Arma armaEquipada = getArmaEquipada();
         String nombreArma = (armaEquipada != null) ? armaEquipada.getNombre() : "puños";
 
-        System.out.println("Gerolando ataca de tipo " + tipoAtaque + " con " + nombreArma);
+        System.out.println("Gerolando ataca de tipo " + getTipoAtaque() + " con " + nombreArma);
 
-        enemigo.recibirAtaque(danoBase, tipoAtaque);
-    }
-
-    public int getAtaque() {
-        int base = fuerza;
-        int ataqueArma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;
-        return base + ataqueArma;
-    }
-
-    public String getTipoAtaque() {
-        if (armaEquipada != null) {
-            return armaEquipada.tipo;
-        }
-        return "melee";
-    }
-
-    public int getDefensa() {
-        return (armaduraEquipada != null) ? armaduraEquipada.getDefensa() : 0;
+        enemigo.recibirAtaque(danoBase, this.getTipoAtaque());
     }
 
     public void recibirAtaque(int dano) {
@@ -180,14 +159,14 @@ public class Gerolando {
         System.out.println("Ataque: " + getAtaque());
         System.out.println("Defensa: " + getDefensa());
 
-        if (armaEquipada != null) {
-            System.out.println("Arma equipada: " + armaEquipada.getNombre());
+        if (getArmaEquipada() != null) {
+            System.out.println("Arma equipada: " + getArmaEquipada().getNombre());
         } else {
             System.out.println("No hay arma equipada.");
         }
 
-        if (armaduraEquipada != null) {
-            System.out.println("Armadura equipada: " + armaduraEquipada.getNombre());
+        if (getArmaduraEquipada() != null) {
+            System.out.println("Armadura equipada: " + getArmaduraEquipada().getNombre());
         } else {
             System.out.println("No hay armadura equipada.");
         }
