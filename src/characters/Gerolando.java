@@ -1,32 +1,32 @@
 package characters;
 
+import game.progression.ProgressionSystem;
 import items.Arma;
 import items.Armadura;
 import items.Item;
 
 public class Gerolando {
-//ATRIBUTOS
+    // ATRIBUTOS
     public int vidaMax, vidaActual;
-    public int nivel;
     public int fuerza;
     public int velocidad;
-    private int xp;
 
-    //Porcentajes
+    // Mana
     public int manaMax, manaActual;
 
-    //Inventario
+    // Inventario
     private Arma armaEquipada;
     private Armadura armaduraEquipada;
     public Inventario inventario;
 
-//FUNCIONES
-    //Constructor
-    public Gerolando(){
+    // Sistema de progresión
+    private ProgressionSystem progressionSystem;
+
+    // CONSTRUCTOR
+    public Gerolando() {
         this.vidaMax = 100;
-        this.xp = 0;
         this.vidaActual = vidaMax;
-        this.nivel = 1;
+
         this.fuerza = 5;
         this.velocidad = 20;
 
@@ -34,46 +34,97 @@ public class Gerolando {
         this.manaActual = manaMax;
 
         this.inventario = new Inventario();
+        this.progressionSystem = new ProgressionSystem();
     }
 
-    //Equipar
-    public void equiparArma(Arma arma){
+    // =========================
+    // PROGRESIÓN
+    // =========================
+    public int getNivel() {
+        return progressionSystem.getNivel();
+    }
+
+    public int getXP() {
+        return progressionSystem.getXP();
+    }
+
+    public void ganarXP(int cantidad) {
+        progressionSystem.ganarXP(cantidad, this);
+    }
+
+    public void aumentarVidaMax(int cantidad) {
+        this.vidaMax += cantidad;
+    }
+
+    public void aumentarFuerza(int cantidad) {
+        this.fuerza += cantidad;
+    }
+
+    public void aumentarManaMax(int cantidad) {
+        this.manaMax += cantidad;
+    }
+
+    public void aumentarVelocidadBase(int cantidad) {
+        this.velocidad += cantidad;
+    }
+
+    public void restaurarVidaYMana() {
+        this.vidaActual = this.vidaMax;
+        this.manaActual = this.manaMax;
+    }
+
+    // =========================
+    // EQUIPO
+    // =========================
+    public void equiparArma(Arma arma) {
         this.armaEquipada = arma;
         System.out.println("Equipaste el arma: " + arma.getNombre());
     }
-    public void equiparArmadura(Armadura armadura){
+
+    public void equiparArmadura(Armadura armadura) {
         this.armaduraEquipada = armadura;
         System.out.println("Equipaste la armadura: " + armadura.getNombre());
     }
 
     public void usarItem(Item item) {
-
         if (item == null) return;
 
-        if (item instanceof Arma ) {
+        if (item instanceof Arma) {
             if (armaEquipada == null || !armaEquipada.equals(item)) {
                 equiparArma((Arma) item);
-                System.out.println("Equipaste el arma: " + item.getNombre());
+            } else {
+                item.usar();
             }
-            else{item.usar();}
+            return;
         }
 
         if (item instanceof Armadura) {
             if (armaduraEquipada == null || !armaduraEquipada.equals(item)) {
                 equiparArmadura((Armadura) item);
-                System.out.println("Equipaste la armadura: " + item.getNombre());
+            } else {
+                item.usar();
             }
-            else{item.usar();}
         }
     }
 
-    //Combate
-    public int getVelocidad(){
-        int base = velocidad;
-        int arma = (armaEquipada != null) ? armaEquipada.getPeso() : 0;
-        int armadura = (armaduraEquipada != null) ? armaduraEquipada.getPeso() : 0;
-        return base - (arma + armadura);
+    public Arma getArmaEquipada() {
+        return armaEquipada;
     }
+
+    public Armadura getArmaduraEquipada() {
+        return armaduraEquipada;
+    }
+
+    // =========================
+    // COMBATE
+    // =========================
+    public int getVelocidad() {
+        int base = velocidad;
+        int pesoArma = (armaEquipada != null) ? armaEquipada.getPeso() : 0;
+        int pesoArmadura = (armaduraEquipada != null) ? armaduraEquipada.getPeso() : 0;
+        return base - (pesoArma + pesoArmadura);
+    }
+
     public void atacar(Enemigo enemigo) {
         int danoBase = this.getAtaque();
 
@@ -83,52 +134,62 @@ public class Gerolando {
             System.out.println("¡Golpe crítico!");
         }
 
-        System.out.println("Gerolando ataque de tipo " + getTipoAtaque()+" con "+ this.armaEquipada.getNombre());
+        String tipoAtaque = getTipoAtaque();
+        String nombreArma = (armaEquipada != null) ? armaEquipada.getNombre() : "puños";
 
-        enemigo.recibirAtaque(danoBase, this.getTipoAtaque());
+        System.out.println("Gerolando ataca de tipo " + tipoAtaque + " con " + nombreArma);
+
+        enemigo.recibirAtaque(danoBase, tipoAtaque);
     }
-    public int getAtaque(){
+
+    public int getAtaque() {
         int base = fuerza;
-        int arma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;
-        return base + arma;
+        int ataqueArma = (armaEquipada != null) ? armaEquipada.getAtaque() : 0;
+        return base + ataqueArma;
     }
-    public String getTipoAtaque(){
-        return armaEquipada.tipo;
+
+    public String getTipoAtaque() {
+        if (armaEquipada != null) {
+            return armaEquipada.tipo;
+        }
+        return "melee";
     }
-    public int getDefensa(){
+
+    public int getDefensa() {
         return (armaduraEquipada != null) ? armaduraEquipada.getDefensa() : 0;
     }
+
     public void recibirAtaque(int dano) {
         int reducido = Math.max(0, dano - getDefensa());
         vidaActual -= reducido;
 
-        System.out.println("Gerolando recibió " + reducido + " de daño. Vida actual: " + vidaActual);
-
         if (vidaActual < 0) {
             vidaActual = 0;
         }
+
+        System.out.println("Gerolando recibió " + reducido + " de daño. Vida actual: " + vidaActual);
     }
+
     public void imprimirEstado() {
         System.out.println("Vida: " + vidaActual + "/" + vidaMax);
-        System.out.println("Nivel: " + nivel);
+        System.out.println("Nivel: " + getNivel());
         System.out.println("Fuerza: " + fuerza);
-        System.out.println("Mana: " + manaActual);
         System.out.println("Velocidad: " + getVelocidad());
         System.out.println("Mana: " + manaActual + "/" + manaMax);
-        System.out.println("XP: " + xp);
+        System.out.println("XP: " + getXP());
         System.out.println("Ataque: " + getAtaque());
+        System.out.println("Defensa: " + getDefensa());
+
         if (armaEquipada != null) {
             System.out.println("Arma equipada: " + armaEquipada.getNombre());
         } else {
             System.out.println("No hay arma equipada.");
         }
+
         if (armaduraEquipada != null) {
             System.out.println("Armadura equipada: " + armaduraEquipada.getNombre());
         } else {
             System.out.println("No hay armadura equipada.");
         }
     }
-
-
-
 }
