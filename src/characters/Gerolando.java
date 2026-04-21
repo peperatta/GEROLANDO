@@ -9,7 +9,6 @@ public class Gerolando {
     public int vidaMax, vidaActual;
     public int nivel;
     public int fuerza;
-    public int magia;
     public int velocidad;
     private int xp;
 
@@ -29,7 +28,6 @@ public class Gerolando {
         this.vidaActual = vidaMax;
         this.nivel = 1;
         this.fuerza = 5;
-        this.magia = 5;
         this.velocidad = 20;
 
         this.manaMax = 3;
@@ -41,9 +39,11 @@ public class Gerolando {
     //Equipar
     public void equiparArma(Arma arma){
         this.armaEquipada = arma;
+        System.out.println("Equipaste el arma: " + arma.getNombre());
     }
     public void equiparArmadura(Armadura armadura){
         this.armaduraEquipada = armadura;
+        System.out.println("Equipaste la armadura: " + armadura.getNombre());
     }
 
     public void usarItem(Item item) {
@@ -106,6 +106,26 @@ public class Gerolando {
 
         if (vidaActual < 0) {
             vidaActual = 0;
+        }
+    }
+    public void imprimirEstado() {
+        System.out.println("Vida: " + vidaActual + "/" + vidaMax);
+        System.out.println("Nivel: " + nivel);
+        System.out.println("Fuerza: " + fuerza);
+        System.out.println("Mana: " + manaActual);
+        System.out.println("Velocidad: " + getVelocidad());
+        System.out.println("Mana: " + manaActual + "/" + manaMax);
+        System.out.println("XP: " + xp);
+        System.out.println("Ataque: " + getAtaque());
+        if (armaEquipada != null) {
+            System.out.println("Arma equipada: " + armaEquipada.getNombre());
+        } else {
+            System.out.println("No hay arma equipada.");
+        }
+        if (armaduraEquipada != null) {
+            System.out.println("Armadura equipada: " + armaduraEquipada.getNombre());
+        } else {
+            System.out.println("No hay armadura equipada.");
         }
     }
 

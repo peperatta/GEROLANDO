@@ -35,12 +35,14 @@ public class Main {
 
         // Crear items
         Arma espadaHierro = factory.crear("espada_hierro");
+        Arma espadaMadera = factory.crear("espada_madera");
         Armadura RopaVieja = armaduraFactory.crear("ropa_vieja");
         Enemigo finko = enemigoFactory.crear("finko");
 
 
         Gerolando gerolando = new Gerolando();
         gerolando.inventario.agregar(espadaHierro);
+        gerolando.inventario.agregar(espadaMadera);
         gerolando.inventario.agregar(RopaVieja);
         gerolando.equiparArmadura(RopaVieja);
         gerolando.equiparArma(espadaHierro);

@@ -9,6 +9,6 @@ public class ArmaMelee extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Slaash! ");
+        System.out.println("Equipaste el arma: " + nombre);
     }
 }

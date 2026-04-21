@@ -9,6 +9,6 @@ public class ArmaMagica extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Whooosh! ");
+        System.out.println("Equipaste el arma: " + nombre);
     }
 }

@@ -9,6 +9,6 @@ public class ArmaRango extends Arma{
 
     @Override
     public void usar() {
-        System.out.println("Shooom!");
+        System.out.println("Equipaste el arma: " + nombre);
     }
 }

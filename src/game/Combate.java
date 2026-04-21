@@ -2,6 +2,11 @@ package game;
 
 import characters.Gerolando;
 import characters.Enemigo;
+import items.Arma;
+import items.Armadura;
+import items.Item;
+
+import java.util.Scanner;
 
 public class Combate {
 
@@ -44,9 +49,30 @@ public class Combate {
     // Turno del jugador
     private static void turnoJugador(Gerolando jugador, Enemigo enemigo) {
         System.out.println("Turno de Gerolando");
+        Scanner scanner = new Scanner(System.in);
+        int opcion = scanner.nextInt();
+        switch(opcion){
+            case 1: jugador.atacar(enemigo);
+            break;
+            case 2: jugador.inventario.mostrarInventario();
+            int itemIndex = scanner.nextInt() -1;
+            if(itemIndex >= 0 && itemIndex < jugador.inventario.size()){
+                Item item = jugador.inventario.getItems().get(itemIndex);
+                if (item instanceof Arma){
+                    jugador.equiparArma((Arma) item);
+                }
+                else if(item instanceof Armadura){
+                    jugador.equiparArmadura((Armadura) item);
+                }
 
-        // Por ahora solo ataca (meter menu despues)
-        jugador.atacar(enemigo);
+            } else {
+                System.out.println("Índice de arma no válido.");
+            }
+            break;
+            case 3: jugador.imprimirEstado();
+            break;
+            default: System.out.println("Opción no válida. Se pierde el turno.");
+        }
     }
 
     // Turno del enemigo

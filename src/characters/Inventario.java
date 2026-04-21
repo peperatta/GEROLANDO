@@ -69,7 +69,7 @@ public class Inventario {
         System.out.println("=== Inventario ===");
 
         for (int i = 0; i < items.size(); i++) {
-            System.out.println("- " + items.get(i).getNombre());
+            System.out.println((i+1) + " "+items.get(i).getNombre());
         }
     }
 }
