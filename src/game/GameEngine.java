@@ -3,6 +3,9 @@ package game;
 import characters.Enemigo;
 import characters.Gerolando;
 import data.factory.EnemigoFactory;
+import game.world.Biome;
+import game.world.Biomes;
+import items.Item;
 
 import java.util.Random;
 import java.util.Scanner;
@@ -14,6 +17,7 @@ public class GameEngine {
     private Scanner scanner;
     private Random random;
     private boolean running;
+    private Biome biomeActual;
 
     public GameEngine(Gerolando jugador, EnemigoFactory enemigoFactory) {
         this.jugador = jugador;
@@ -22,6 +26,7 @@ public class GameEngine {
         this.random = new Random();
         this.running = true;
         this.currentState = GameState.MENU;
+        this.biomeActual = Biomes.PLAYA; // zona inicial
     }
 
     public void start() {
@@ -56,6 +61,8 @@ public class GameEngine {
             case 1:
                 currentState = GameState.EXPLORATION;
                 System.out.println("\nComienza la aventura de Gerolando...");
+                System.out.println("Zona inicial: " + biomeActual.getNombre());
+                System.out.println(biomeActual.getDescripcion());
                 break;
             case 2:
                 running = false;
@@ -68,10 +75,13 @@ public class GameEngine {
 
     private void handleExploration() {
         System.out.println("\n=== EXPLORACIÓN ===");
+        System.out.println("Zona actual: " + biomeActual.getNombre());
+        System.out.println(biomeActual.getDescripcion());
         System.out.println("1. Avanzar");
         System.out.println("2. Ver estado");
         System.out.println("3. Ver inventario");
-        System.out.println("4. Salir");
+        System.out.println("4. Cambiar de zona");
+        System.out.println("5. Salir");
         System.out.print("Elige una opción: ");
 
         int opcion = scanner.nextInt();
@@ -87,6 +97,9 @@ public class GameEngine {
                 manejarInventario();
                 break;
             case 4:
+                cambiarZona();
+                break;
+            case 5:
                 running = false;
                 System.out.println("Saliendo del juego...");
                 break;
@@ -96,16 +109,21 @@ public class GameEngine {
     }
 
     private void avanzar() {
-        System.out.println("\nGerolando avanza por el camino...");
+        System.out.println("\nGerolando avanza por " + biomeActual.getNombre() + "...");
 
-        boolean hayEncuentro = random.nextInt(100) < 30;
+        boolean hayEncuentro = random.nextInt(100) < biomeActual.getProbabilidadEncuentro();
 
         if (hayEncuentro) {
-            System.out.println("¡Un enemigo apareció!");
-
             Enemigo enemigo = generarEnemigoAleatorio();
-            currentState = GameState.COMBAT;
 
+            if (enemigo == null) {
+                System.out.println("Ocurrió un problema al generar el enemigo.");
+                return;
+            }
+
+            System.out.println("¡Un " + enemigo.nombre + " apareció!");
+
+            currentState = GameState.COMBAT;
             Combate.iniciarCombate(jugador, enemigo);
 
             if (jugador.estaVivo()) {
@@ -119,29 +137,16 @@ public class GameEngine {
     }
 
     private Enemigo generarEnemigoAleatorio() {
-        // Por ahora usamos solo enemigos que sí existan en tu JSON.
-        // De momento te dejo finko porque ya sabemos que funciona.
-        String[] enemigosDisponibles = {"finko"};
+        String[] enemigosDisponibles = biomeActual.getEnemigosDisponibles();
+
+        if (enemigosDisponibles == null || enemigosDisponibles.length == 0) {
+            return null;
+        }
 
         String idElegido = enemigosDisponibles[random.nextInt(enemigosDisponibles.length)];
         return enemigoFactory.crear(idElegido);
     }
 
-    private void handleGameOver() {
-        System.out.println("\n=== GAME OVER ===");
-        System.out.println("Gerolando ha caído en combate.");
-        System.out.println("1. Salir");
-        System.out.print("Elige una opción: ");
-
-        int opcion = scanner.nextInt();
-
-        if (opcion == 1) {
-            running = false;
-            System.out.println("Fin del juego.");
-        } else {
-            System.out.println("Opción no válida.");
-        }
-    }
     private void manejarInventario() {
         if (jugador.inventario.size() == 0) {
             System.out.println("El inventario está vacío.");
@@ -163,9 +168,58 @@ public class GameEngine {
         int itemIndex = opcion - 1;
 
         if (itemIndex >= 0 && itemIndex < jugador.inventario.size()) {
-            jugador.usarItem(jugador.inventario.getItems().get(itemIndex));
+            Item item = jugador.inventario.getItems().get(itemIndex);
+            jugador.usarItem(item);
         } else {
             System.out.println("Índice de item no válido.");
+        }
+    }
+
+    private void cambiarZona() {
+        System.out.println("\n=== CAMBIAR DE ZONA ===");
+        System.out.println("1. Playa");
+        System.out.println("2. Bosque");
+        System.out.println("3. Cueva");
+        System.out.println("0. Cancelar");
+        System.out.print("Elige una zona: ");
+
+        int opcion = scanner.nextInt();
+
+        switch (opcion) {
+            case 1:
+                biomeActual = Biomes.PLAYA;
+                break;
+            case 2:
+                biomeActual = Biomes.BOSQUE;
+                break;
+            case 3:
+                biomeActual = Biomes.CUEVA;
+                break;
+            case 0:
+                System.out.println("Cambio de zona cancelado.");
+                return;
+            default:
+                System.out.println("Opción no válida.");
+                return;
+        }
+
+        System.out.println("Ahora estás en: " + biomeActual.getNombre());
+        System.out.println(biomeActual.getDescripcion());
+    }
+
+    private void handleGameOver() {
+        System.out.println("\n=== GAME OVER ===");
+        System.out.println("Gerolando ha caído en combate.");
+        System.out.println("1. Salir");
+        System.out.print("Elige una opción: ");
+
+        int opcion = scanner.nextInt();
+
+        if (opcion == 1) {
+            running = false;
+            System.out.println("Fin del juego.");
+        } else {
+            System.out.println("Opción no válida.");
         }
     }
 }

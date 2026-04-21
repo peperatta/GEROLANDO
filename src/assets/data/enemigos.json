@@ -8,6 +8,26 @@
     "spritePath": "src/assets/sprites/enemigos/finko.png",
     "velocidad": 6,
     "debilidad": "magica"
+  },
+  {
+    "id": "calabazo",
+    "nombre": "Calabazo",
+    "vida": 30,
+    "ataque": 10,
+    "defensa": 2,
+    "spritePath": "src/assets/sprites/enemigos/calabazo.png",
+    "velocidad": 6,
+    "debilidad": "rango"
+  },
+  {
+    "id": "diablo",
+    "nombre": "Diablo",
+    "vida": 40,
+    "ataque": 15,
+    "defensa": 4,
+    "spritePath": "src/assets/sprites/enemigos/calabazo.png",
+    "velocidad": 6,
+    "debilidad": "magica"
   }
 ]
 
