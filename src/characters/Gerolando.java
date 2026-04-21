@@ -1,42 +1,25 @@
 package characters;
 
 import characters.equipment.EquipmentSystem;
+import characters.stats.CombatStats;
 import game.progression.ProgressionSystem;
 import items.Arma;
 import items.Armadura;
 import items.Item;
 
 public class Gerolando {
-    // ATRIBUTOS
-    public int vidaMax, vidaActual;
-    public int fuerza;
-    public int velocidad;
-
-    // Mana
-    public int manaMax, manaActual;
-
-    // Inventario
     public Inventario inventario;
 
-    // Sistemas
     private ProgressionSystem progressionSystem;
     private EquipmentSystem equipmentSystem;
+    private CombatStats combatStats;
 
-    // CONSTRUCTOR
     public Gerolando() {
-        this.vidaMax = 100;
-        this.vidaActual = vidaMax;
-
-        this.fuerza = 5;
-        this.velocidad = 20;
-
-        this.manaMax = 3;
-        this.manaActual = manaMax;
-
         this.inventario = new Inventario();
 
         this.progressionSystem = new ProgressionSystem();
         this.equipmentSystem = new EquipmentSystem();
+        this.combatStats = new CombatStats(100, 5, 20, 3);
     }
 
     // =========================
@@ -55,24 +38,23 @@ public class Gerolando {
     }
 
     public void aumentarVidaMax(int cantidad) {
-        this.vidaMax += cantidad;
+        combatStats.aumentarVidaMax(cantidad);
     }
 
     public void aumentarFuerza(int cantidad) {
-        this.fuerza += cantidad;
+        combatStats.aumentarFuerza(cantidad);
     }
 
     public void aumentarManaMax(int cantidad) {
-        this.manaMax += cantidad;
+        combatStats.aumentarManaMax(cantidad);
     }
 
     public void aumentarVelocidadBase(int cantidad) {
-        this.velocidad += cantidad;
+        combatStats.aumentarVelocidadBase(cantidad);
     }
 
     public void restaurarVidaYMana() {
-        this.vidaActual = this.vidaMax;
-        this.manaActual = this.manaMax;
+        combatStats.restaurarVidaYMana();
     }
 
     // =========================
@@ -103,14 +85,45 @@ public class Gerolando {
     }
 
     // =========================
+    // STATS BASE
+    // =========================
+    public int getVidaMax() {
+        return combatStats.getVidaMax();
+    }
+
+    public int getVidaActual() {
+        return combatStats.getVidaActual();
+    }
+
+    public int getFuerzaBase() {
+        return combatStats.getFuerza();
+    }
+
+    public int getVelocidadBase() {
+        return combatStats.getVelocidadBase();
+    }
+
+    public int getManaMax() {
+        return combatStats.getManaMax();
+    }
+
+    public int getManaActual() {
+        return combatStats.getManaActual();
+    }
+
+    public boolean estaVivo() {
+        return combatStats.estaVivo();
+    }
+
+    // =========================
     // COMBATE
     // =========================
     public int getVelocidad() {
-        return velocidad - equipmentSystem.getPenalizacionPeso();
+        return combatStats.getVelocidadBase() - equipmentSystem.getPenalizacionPeso();
     }
 
     public int getAtaque() {
-        return fuerza + equipmentSystem.getAtaqueBonus();
+        return combatStats.getFuerza() + equipmentSystem.getAtaqueBonus();
     }
 
     public int getDefensa() {
@@ -140,21 +153,17 @@ public class Gerolando {
 
     public void recibirAtaque(int dano) {
         int reducido = Math.max(0, dano - getDefensa());
-        vidaActual -= reducido;
+        combatStats.recibirDanio(reducido);
 
-        if (vidaActual < 0) {
-            vidaActual = 0;
-        }
-
-        System.out.println("Gerolando recibió " + reducido + " de daño. Vida actual: " + vidaActual);
+        System.out.println("Gerolando recibió " + reducido + " de daño. Vida actual: " + getVidaActual());
     }
 
     public void imprimirEstado() {
-        System.out.println("Vida: " + vidaActual + "/" + vidaMax);
+        System.out.println("Vida: " + getVidaActual() + "/" + getVidaMax());
         System.out.println("Nivel: " + getNivel());
-        System.out.println("Fuerza: " + fuerza);
+        System.out.println("Fuerza: " + getFuerzaBase());
         System.out.println("Velocidad: " + getVelocidad());
-        System.out.println("Mana: " + manaActual + "/" + manaMax);
+        System.out.println("Mana: " + getManaActual() + "/" + getManaMax());
         System.out.println("XP: " + getXP());
         System.out.println("Ataque: " + getAtaque());
         System.out.println("Defensa: " + getDefensa());

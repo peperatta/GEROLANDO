@@ -14,7 +14,6 @@ public class Combate {
     public static void iniciarCombate(Gerolando jugador, Enemigo enemigo) {
         System.out.println("¡Comienza el combate contra " + enemigo.nombre + "!\n");
 
-        // Determinar quién empieza
         boolean turnoJugador = jugador.getVelocidad() >= enemigo.getVelocidad();
 
         if (turnoJugador) {
@@ -23,8 +22,7 @@ public class Combate {
             System.out.println(enemigo.nombre + " es más rápido y ataca primero.\n");
         }
 
-        // Loop principal del combate
-        while (jugador.vidaActual > 0 && enemigo.vidaActual > 0) {
+        while (jugador.estaVivo() && enemigo.vidaActual > 0) {
             if (turnoJugador) {
                 turnoJugador(jugador, enemigo);
             } else {
@@ -35,8 +33,7 @@ public class Combate {
             System.out.println("----------------------------------");
         }
 
-        // Resultado final
-        if (jugador.vidaActual > 0) {
+        if (jugador.estaVivo()) {
             System.out.println("¡Ganaste el combate!");
             int xpGanada = enemigo.getVida() / 5;
             jugador.ganarXP(xpGanada);
