@@ -120,15 +120,34 @@ public class Shop {
             return;
         }
 
-        boolean agregado = jugador.inventario.agregar(itemComprado);
+        if (!jugador.inventario.estaLleno()) {
+            boolean agregado = jugador.inventario.agregar(itemComprado);
 
-        if (!agregado) {
-            System.out.println("No se pudo agregar al inventario.");
+            if (!agregado) {
+                System.out.println("No se pudo agregar al inventario.");
+                jugador.ganarOro(precio);
+                return;
+            }
+
+            System.out.println("Compraste: " + itemComprado.getNombre() + " por " + precio + " de oro.");
+            return;
+        }
+
+        System.out.println("El inventario está lleno.");
+        System.out.println("¿Quieres reemplazar un objeto?");
+        System.out.println("1. Sí");
+        System.out.println("2. No");
+        System.out.print("Elige una opción: ");
+
+        int decision = scanner.nextInt();
+
+        if (decision != 1) {
+            System.out.println("No se agregó el objeto.");
             jugador.ganarOro(precio);
             return;
         }
 
-        System.out.println("Compraste: " + itemComprado.getNombre() + " por " + precio + " de oro.");
+        reemplazarItemDelInventario(jugador, itemComprado, precio);
     }
 
     private void venderProducto(Gerolando jugador) {
@@ -190,5 +209,45 @@ public class Shop {
             default:
                 return null;
         }
+    }
+    private void reemplazarItemDelInventario(Gerolando jugador, Item nuevoItem, int precioPagado) {
+        System.out.println("\n=== INVENTARIO LLENO ===");
+        jugador.inventario.mostrarInventario();
+        System.out.println("0. Cancelar");
+        System.out.print("Selecciona el objeto que quieres reemplazar: ");
+
+        int opcion = scanner.nextInt();
+
+        if (opcion == 0) {
+            System.out.println("No se agregó el objeto.");
+            jugador.ganarOro(precioPagado);
+            return;
+        }
+
+        int index = opcion - 1;
+
+        if (index < 0 || index >= jugador.inventario.size()) {
+            System.out.println("Índice no válido.");
+            jugador.ganarOro(precioPagado);
+            return;
+        }
+
+        Item itemAnterior = jugador.inventario.getItem(index);
+
+        if (jugador.estaEquipado(itemAnterior)) {
+            System.out.println("No puedes reemplazar un objeto que está equipado.");
+            jugador.ganarOro(precioPagado);
+            return;
+        }
+
+        boolean reemplazado = jugador.inventario.reemplazarItem(index, nuevoItem);
+
+        if (!reemplazado) {
+            System.out.println("No se pudo reemplazar el objeto.");
+            jugador.ganarOro(precioPagado);
+            return;
+        }
+
+        System.out.println("Reemplazaste " + itemAnterior.getNombre() + " por " + nuevoItem.getNombre() + ".");
     }
 }

@@ -56,8 +56,23 @@ public class Inventario {
         return null;
     }
 
-    public void mostrarInventario() {
+    public Item getItem(int index) {
+        if (index < 0 || index >= items.size()) {
+            return null;
+        }
+        return items.get(index);
+    }
 
+    public boolean reemplazarItem(int index, Item nuevoItem) {
+        if (index < 0 || index >= items.size() || nuevoItem == null) {
+            return false;
+        }
+
+        items.set(index, nuevoItem);
+        return true;
+    }
+
+    public void mostrarInventario() {
         if (items.isEmpty()) {
             System.out.println("Vacío");
             return;
