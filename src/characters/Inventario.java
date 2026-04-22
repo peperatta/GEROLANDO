@@ -57,7 +57,6 @@ public class Inventario {
     }
 
     public void mostrarInventario() {
-        System.out.println("=== Inventario ===");
 
         if (items.isEmpty()) {
             System.out.println("Vacío");
