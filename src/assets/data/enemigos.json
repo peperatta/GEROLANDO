@@ -7,7 +7,9 @@
     "defensa": 2,
     "spritePath": "src/assets/sprites/enemigos/finko.png",
     "velocidad": 6,
-    "debilidad": "magica"
+    "debilidad": "magica",
+    "drops": ["pocion_vida_pequena", "palo_madera"],
+    "dropChance": 25
   },
   {
     "id": "calabazo",
@@ -17,7 +19,9 @@
     "defensa": 2,
     "spritePath": "src/assets/sprites/enemigos/calabazo.png",
     "velocidad": 6,
-    "debilidad": "rango"
+    "debilidad": "rango",
+    "drops": ["pocion_vida_pequena", "espada_madera"],
+    "dropChance": 25
   },
   {
     "id": "diablo",
@@ -27,7 +31,9 @@
     "defensa": 4,
     "spritePath": "src/assets/sprites/enemigos/calabazo.png",
     "velocidad": 6,
-    "debilidad": "magica"
+    "debilidad": "magica",
+    "drops": ["pocion_vida_pequena", "espada_madera"],
+    "dropChance": 35
   }
 ]
 

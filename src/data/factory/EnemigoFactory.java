@@ -1,7 +1,7 @@
 package data.factory;
 
-import characters.Enemigo;
 import data.model.DatosEnemigo;
+import characters.Enemigo;
 
 import java.util.Map;
 
@@ -14,14 +14,22 @@ public class EnemigoFactory {
     }
 
     public Enemigo crear(String id) {
-
         DatosEnemigo d = catalogo.get(id);
 
         if (d == null) {
             throw new RuntimeException("Enemigo no encontrado: " + id);
         }
 
-        return new Enemigo(d.nombre, d.vida, d.ataque, d.defensa, d.spritePath, d.velocidad, d.debilidad);
+        return new Enemigo(
+                d.nombre,
+                d.vida,
+                d.ataque,
+                d.defensa,
+                d.velocidad,
+                d.debilidad,
+                d.spritePath,
+                d.drops,
+                d.dropChance
+        );
     }
 }
-

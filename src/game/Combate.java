@@ -2,12 +2,30 @@ package game;
 
 import characters.Enemigo;
 import characters.Gerolando;
+import data.factory.ArmaFactory;
+import data.factory.ArmaduraFactory;
+import data.factory.PotionFactory;
 import items.Item;
 
+import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Combate {
     static Scanner scanner = new Scanner(System.in);
+    static Random random = new Random();
+
+    private static PotionFactory potionFactory;
+    private static ArmaFactory armaFactory;
+    private static ArmaduraFactory armaduraFactory;
+
+    public static void configurarDrops(PotionFactory potionFactoryParam,
+                                       ArmaFactory armaFactoryParam,
+                                       ArmaduraFactory armaduraFactoryParam) {
+        potionFactory = potionFactoryParam;
+        armaFactory = armaFactoryParam;
+        armaduraFactory = armaduraFactoryParam;
+    }
 
     public static void iniciarCombate(Gerolando jugador, Enemigo enemigo) {
         System.out.println("¡Comienza el combate contra " + enemigo.nombre + "!\n");
@@ -34,10 +52,12 @@ public class Combate {
         if (jugador.estaVivo()) {
             System.out.println("¡Ganaste el combate!");
             int xpGanada = enemigo.getVida() / 5;
-            int oroGanado = enemigo.getVida() / 10;
+            int oroGanado = enemigo.getVida() / 3;
 
             jugador.ganarXP(xpGanada);
             jugador.ganarOro(oroGanado);
+
+            procesarDrop(enemigo, jugador);
         } else {
             System.out.println("Has sido derrotado...");
         }
@@ -98,7 +118,7 @@ public class Combate {
         if (itemIndex >= 0 && itemIndex < jugador.inventario.size()) {
             Item item = jugador.inventario.getItems().get(itemIndex);
             jugador.usarItem(item);
-            return true; // usar/equipar sí consume el turno
+            return true;
         } else {
             System.out.println("Índice de item no válido.");
             return false;
@@ -108,5 +128,104 @@ public class Combate {
     private static void turnoEnemigo(Enemigo enemigo, Gerolando jugador) {
         System.out.println("Turno de " + enemigo.nombre);
         enemigo.atacar(jugador);
+    }
+
+    private static void procesarDrop(Enemigo enemigo, Gerolando jugador) {
+        List<String> drops = enemigo.getDrops();
+
+        if (drops == null || drops.isEmpty()) {
+            return;
+        }
+
+        int roll = random.nextInt(100) + 1;
+
+        if (roll > enemigo.getDropChance()) {
+            return;
+        }
+
+        String dropId = drops.get(random.nextInt(drops.size()));
+        Item drop = crearItemDesdeId(dropId);
+
+        if (drop == null) {
+            System.out.println("No se pudo generar el drop: " + dropId);
+            return;
+        }
+
+        System.out.println("¡El enemigo soltó: " + drop.getNombre() + "!");
+
+        if (!jugador.inventario.estaLleno()) {
+            jugador.inventario.agregar(drop);
+            System.out.println(drop.getNombre() + " fue agregado al inventario.");
+            return;
+        }
+
+        System.out.println("Pero tu inventario está lleno.");
+        manejarDropConInventarioLleno(jugador, drop);
+    }
+
+    private static void manejarDropConInventarioLleno(Gerolando jugador, Item nuevoItem) {
+        System.out.println("\n=== INVENTARIO LLENO ===");
+        jugador.inventario.mostrarInventario();
+        System.out.println("0. No recoger el objeto");
+        System.out.print("Selecciona el objeto que quieres reemplazar: ");
+
+        int opcion = scanner.nextInt();
+
+        if (opcion == 0) {
+            System.out.println("Dejaste " + nuevoItem.getNombre() + " en el suelo.");
+            return;
+        }
+
+        int index = opcion - 1;
+
+        if (index < 0 || index >= jugador.inventario.size()) {
+            System.out.println("Índice no válido. No recogiste el objeto.");
+            return;
+        }
+
+        Item itemAnterior = jugador.inventario.getItem(index);
+
+        if (jugador.estaEquipado(itemAnterior)) {
+            System.out.println("No puedes reemplazar un objeto que está equipado.");
+            System.out.println("No recogiste " + nuevoItem.getNombre() + ".");
+            return;
+        }
+
+        boolean reemplazado = jugador.inventario.reemplazarItem(index, nuevoItem);
+
+        if (!reemplazado) {
+            System.out.println("No se pudo reemplazar el objeto.");
+            return;
+        }
+
+        System.out.println("Reemplazaste " + itemAnterior.getNombre() + " por " + nuevoItem.getNombre() + ".");
+    }
+
+    private static Item crearItemDesdeId(String id) {
+        if (potionFactory != null) {
+            try {
+                Item item = potionFactory.crear(id);
+                if (item != null) return item;
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (armaFactory != null) {
+            try {
+                Item item = armaFactory.crear(id);
+                if (item != null) return item;
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (armaduraFactory != null) {
+            try {
+                Item item = armaduraFactory.crear(id);
+                if (item != null) return item;
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 }

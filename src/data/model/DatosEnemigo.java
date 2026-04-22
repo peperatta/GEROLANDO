@@ -1,5 +1,7 @@
 package data.model;
 
+import java.util.List;
+
 public class DatosEnemigo {
     public String id;
     public String nombre;
@@ -9,6 +11,7 @@ public class DatosEnemigo {
     public int velocidad;
     public String debilidad;
     public String spritePath;
-    public int precio;
-}
 
+    public List<String> drops;
+    public int dropChance;
+}

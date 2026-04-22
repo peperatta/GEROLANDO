@@ -1,73 +1,69 @@
 package characters;
 
-import items.Arma;
-
-import java.util.Objects;
+import java.util.List;
 
 public class Enemigo {
-        public String nombre;
-        private int vida;
-        public int vidaActual;
-        private int ataque;
-        private int defensa;
-        private int velocidad;
-        public String debilidad;
-        public String spritePath;
+    public String nombre;
+    public int vida;
+    public int vidaActual;
+    public int ataque;
+    public int defensa;
+    public int velocidad;
+    public String debilidad;
+    public String spritePath;
 
-        public Enemigo(String nombre, int vida, int ataque, int defensa, String spritePath, int velocidad, String debilidad) {
-            this.nombre = nombre;
-            this.vida = vida;
-            this.vidaActual = vida;
-            this.ataque = ataque;
-            this.defensa = defensa;
-            this.spritePath = spritePath;
-            this.velocidad = velocidad;
-            this.debilidad = debilidad;
+    private List<String> drops;
+    private int dropChance;
+
+    public Enemigo(String nombre, int vida, int ataque, int defensa, int velocidad,
+                   String debilidad, String spritePath, List<String> drops, int dropChance) {
+        this.nombre = nombre;
+        this.vida = vida;
+        this.vidaActual = vida;
+        this.ataque = ataque;
+        this.defensa = defensa;
+        this.velocidad = velocidad;
+        this.debilidad = debilidad;
+        this.spritePath = spritePath;
+        this.drops = drops;
+        this.dropChance = dropChance;
+    }
+
+    public int getVida() {
+        return vida;
+    }
+
+    public int getVelocidad() {
+        return velocidad;
+    }
+
+    public List<String> getDrops() {
+        return drops;
+    }
+
+    public int getDropChance() {
+        return dropChance;
+    }
+
+    public void recibirAtaque(int dano, String tipoAtaque) {
+        int danoFinal = Math.max(0, dano - defensa);
+
+        if (debilidad != null && debilidad.equalsIgnoreCase(tipoAtaque)) {
+            danoFinal *= 2;
+            System.out.println("¡Es súper efectivo! " + nombre + " es débil a " + tipoAtaque);
         }
-        //Getters
-        public int getVida() {
-            return vida;
+
+        vidaActual -= danoFinal;
+
+        if (vidaActual < 0) {
+            vidaActual = 0;
         }
-        public int getVelocidad() {
-            return velocidad;
-        }
-        public int getAtaque() {
-            return ataque;
-        }
-        public int getDefensa() {
-            return defensa;
-        }
-        public void recibirAtaque(int dano, String tipoAtaque) {
 
-            int danoReducido = dano - this.defensa;
+        System.out.println(nombre + " recibió " + danoFinal + " de daño. Vida actual: " + vidaActual);
+    }
 
-            if (danoReducido <= 0) {
-                System.out.println(nombre + " bloqueó el ataque.");
-                return;
-            }
-
-            int danoTotal = danoReducido;
-
-            if (Objects.equals(this.debilidad, tipoAtaque)) {
-                danoTotal += 3;
-                System.out.println(nombre + " es débil a " + tipoAtaque + "!");
-            }
-
-            this.vidaActual -= danoTotal;
-
-            if (this.vidaActual < 0) {
-                this.vidaActual = 0;
-            }
-
-            System.out.println(nombre + " recibió " + danoTotal + " de daño. Vida restante: " + this.vidaActual);
-        }
-        public void atacar(Gerolando gerolando) {
-            int dano = this.ataque;
-            if (dano <= 0) {
-                System.out.println(nombre + " atacó pero no causó daño.");
-                return;
-            }
-            System.out.println(nombre + " hizo un ataque de " + dano + " de daño");
-            gerolando.recibirAtaque(dano);
-        }
+    public void atacar(Gerolando jugador) {
+        System.out.println(nombre + " ataca.");
+        jugador.recibirAtaque(ataque);
+    }
 }

@@ -1,5 +1,14 @@
 [
   {
+    "id": "palo_madera",
+    "nombre": "Palo de Madera",
+    "tipo": "melee",
+    "ataque": 1,
+    "peso": 1,
+    "spritePath": "src/assets/sprites/armas/palo_madera.png",
+    "precio": 1
+  },
+  {
     "id": "espada_madera",
     "nombre": "Espada de Madera",
     "tipo": "melee",
