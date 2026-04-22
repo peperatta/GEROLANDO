@@ -7,4 +7,5 @@ public class DatosArma {
     public int ataque;
     public int peso;
     public String spritePath;
+    public int precio;
 }

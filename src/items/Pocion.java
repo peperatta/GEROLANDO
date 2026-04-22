@@ -4,8 +4,8 @@ import characters.Gerolando;
 
 public class Pocion extends Consumible {
 
-    public Pocion(String nombre, String tipo, int valor, String spritePath) {
-        super(nombre, tipo, valor, spritePath);
+    public Pocion(String nombre, int precio, String tipo, int valor, String spritePath) {
+        super(nombre, precio, tipo, valor, spritePath);
     }
 
     @Override

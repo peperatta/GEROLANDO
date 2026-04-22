@@ -9,5 +9,6 @@ public class DatosEnemigo {
     public int velocidad;
     public String debilidad;
     public String spritePath;
+    public int precio;
 }
 

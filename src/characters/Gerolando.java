@@ -18,7 +18,7 @@ public class Gerolando {
 
     public Gerolando() {
         this.inventario = new Inventario();
-        this.oro = 0;
+        this.oro = 100;
         this.progressionSystem = new ProgressionSystem();
         this.equipmentSystem = new EquipmentSystem();
         this.combatStats = new CombatStats(100, 5, 20, 3);
