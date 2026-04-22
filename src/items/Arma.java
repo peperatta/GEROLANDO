@@ -7,8 +7,8 @@ public abstract class Arma extends Item {
     public String spritePath;
     public String tipo;
 
-    public Arma(String nombre, int ataque, int peso, String spritePath) {
-        super(nombre);
+    public Arma(String nombre, int precio, int ataque, int peso, String spritePath) {
+        super(nombre, precio);
         this.ataque = ataque;
         this.peso = peso;
         this.spritePath = spritePath;

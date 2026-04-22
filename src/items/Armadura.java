@@ -5,8 +5,8 @@ public class Armadura extends Item{
     private int peso;
     public String spritePath;
 
-    public Armadura(String nombre, int defensa, int peso, String spritePath) {
-        super(nombre);
+    public Armadura(String nombre, int precio, int defensa, int peso, String spritePath) {
+        super(nombre, precio);
         this.defensa = defensa;
         this.peso = peso;
         this.spritePath = spritePath;

@@ -4,21 +4,24 @@
     "nombre": "Ropa Vieja",
     "defensa": 1,
     "peso": 1,
-    "spritePath": "src/assets/sprites/armaduras/ropa_vieja.png"
+    "spritePath": "src/assets/sprites/armaduras/ropa_vieja.png",
+    "precio": 5
   },
   {
     "id": "pecho_acero",
     "nombre": "Coraza de Acero",
     "defensa": 5,
     "peso": 4,
-    "spritePath": "src/assets/sprites/armaduras/pecho_acero.png"
+    "spritePath": "src/assets/sprites/armaduras/pecho_acero.png",
+    "precio": 20
   },
   {
     "id": "madre_santa",
     "nombre": "Armadura Misteriosa",
     "defensa": 9,
     "peso": 1,
-    "spritePath": "src/assets/sprites/armaduras/madre_santa.png"
+    "spritePath": "src/assets/sprites/armaduras/madre_santa.png",
+    "precio": 50
   }
 ]
 

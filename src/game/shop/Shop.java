@@ -29,15 +29,15 @@ public class Shop {
 
     private void cargarCatalogoInicial() {
         // Consumibles
-        productos.add(new ShopProduct("pocion_vida_pequena", "Poción de vida pequeña", 15, "consumible"));
-        productos.add(new ShopProduct("pocion_mana_pequena", "Poción de mana pequeña", 20, "consumible"));
+        productos.add(new ShopProduct("pocion_vida_pequena", "consumible"));
+        productos.add(new ShopProduct("pocion_mana_pequena", "consumible"));
 
         // Armas
-        productos.add(new ShopProduct("espada_madera", "Espada de madera", 25, "arma"));
-        productos.add(new ShopProduct("espada_hierro", "Espada de hierro", 50, "arma"));
+        productos.add(new ShopProduct("espada_madera", "arma"));
+        productos.add(new ShopProduct("espada_hierro", "arma"));
 
         // Armaduras
-        productos.add(new ShopProduct("ropa_vieja", "Ropa vieja", 10, "armadura"));
+        productos.add(new ShopProduct("ropa_vieja", "armadura"));
     }
 
     public void abrirTienda(Gerolando jugador) {
@@ -46,8 +46,9 @@ public class Shop {
         while (!salir) {
             System.out.println("\n=== TIENDA ===");
             System.out.println("Oro actual: " + jugador.getOro());
-            System.out.println("1. Ver productos");
-            System.out.println("2. Salir");
+            System.out.println("1. Comprar");
+            System.out.println("2. Vender");
+            System.out.println("3. Salir");
             System.out.print("Elige una opción: ");
 
             int opcion = scanner.nextInt();
@@ -58,6 +59,9 @@ public class Shop {
                     comprarProducto(jugador);
                     break;
                 case 2:
+                    venderProducto(jugador);
+                    break;
+                case 3:
                     salir = true;
                     System.out.println("Sales de la tienda.");
                     break;
@@ -71,10 +75,16 @@ public class Shop {
         System.out.println("\n=== PRODUCTOS DISPONIBLES ===");
 
         for (int i = 0; i < productos.size(); i++) {
-            ShopProduct p = productos.get(i);
-            System.out.println((i + 1) + ". " + p.getNombreVisible()
-                    + " [" + p.getCategoria() + "] - "
-                    + p.getPrecio() + " oro");
+            ShopProduct producto = productos.get(i);
+            Item item = crearItemDesdeProducto(producto);
+
+            if (item != null) {
+                System.out.println((i + 1) + ". " + item.getNombre()
+                        + " [" + producto.getCategoria() + "] - "
+                        + item.getPrecio() + " oro");
+            } else {
+                System.out.println((i + 1) + ". Error al cargar producto");
+            }
         }
 
         System.out.println("0. Cancelar");
@@ -97,16 +107,16 @@ public class Shop {
         }
 
         ShopProduct producto = productos.get(index);
-
-        if (!jugador.gastarOro(producto.getPrecio())) {
-            return;
-        }
-
         Item itemComprado = crearItemDesdeProducto(producto);
 
         if (itemComprado == null) {
             System.out.println("No se pudo crear el producto.");
-            jugador.ganarOro(producto.getPrecio());
+            return;
+        }
+
+        int precio = itemComprado.getPrecio();
+
+        if (!jugador.gastarOro(precio)) {
             return;
         }
 
@@ -114,11 +124,51 @@ public class Shop {
 
         if (!agregado) {
             System.out.println("No se pudo agregar al inventario.");
-            jugador.ganarOro(producto.getPrecio());
+            jugador.ganarOro(precio);
             return;
         }
 
-        System.out.println("Compraste: " + itemComprado.getNombre());
+        System.out.println("Compraste: " + itemComprado.getNombre() + " por " + precio + " de oro.");
+    }
+
+    private void venderProducto(Gerolando jugador) {
+        if (jugador.inventario.size() == 0) {
+            System.out.println("No tienes items para vender.");
+            return;
+        }
+
+        System.out.println("\n=== VENDER ITEMS ===");
+        jugador.inventario.mostrarInventario();
+        System.out.println("0. Cancelar");
+        System.out.print("Selecciona un item por número para vender: ");
+
+        int opcion = scanner.nextInt();
+
+        if (opcion == 0) {
+            System.out.println("Venta cancelada.");
+            return;
+        }
+
+        int index = opcion - 1;
+
+        if (index < 0 || index >= jugador.inventario.size()) {
+            System.out.println("Índice no válido.");
+            return;
+        }
+
+        Item item = jugador.inventario.getItems().get(index);
+
+        int precioVenta = item.getPrecio() / 2;
+
+        if (precioVenta <= 0) {
+            System.out.println("Ese item no se puede vender.");
+            return;
+        }
+
+        jugador.inventario.eliminar(item);
+        jugador.ganarOro(precioVenta);
+
+        System.out.println("Vendiste " + item.getNombre() + " por " + precioVenta + " de oro.");
     }
 
     private Item crearItemDesdeProducto(ShopProduct producto) {

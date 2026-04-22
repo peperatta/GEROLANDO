@@ -5,7 +5,8 @@
     "tipo": "melee",
     "ataque": 3,
     "peso": 2,
-    "spritePath": "src/assets/sprites/armas/espada_madera.png"
+    "spritePath": "src/assets/sprites/armas/espada_madera.png",
+    "precio": 10
   },
   {
     "id": "espada_hierro",
@@ -13,7 +14,8 @@
     "tipo": "melee",
     "ataque": 9,
     "peso" : 5,
-    "spritePath": "src/assets/sprites/armas/espada_hierro.png"
+    "spritePath": "src/assets/sprites/armas/espada_hierro.png",
+    "precio": 30
   }
 
 ]

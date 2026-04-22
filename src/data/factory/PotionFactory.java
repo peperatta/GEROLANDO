@@ -21,7 +21,7 @@ public class PotionFactory {
             throw new RuntimeException("Poción no encontrada: " + id);
         }
 
-        return new Pocion(d.nombre, d.tipo, d.valor, d.spritePath);
+        return new Pocion(d.nombre,  d.precio, d.tipo, d.valor, d.spritePath);
     }
 }
 

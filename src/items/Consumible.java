@@ -8,8 +8,8 @@ public abstract class Consumible extends Item {
     protected int valor;
     protected String spritePath;
 
-    public Consumible(String nombre, String tipo, int valor, String spritePath) {
-        super(nombre);
+    public Consumible(String nombre, int precio, String tipo, int valor, String spritePath) {
+        super(nombre, precio);
         this.tipo = tipo;
         this.valor = valor;
         this.spritePath = spritePath;

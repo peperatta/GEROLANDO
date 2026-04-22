@@ -6,5 +6,6 @@ public class DatosPocion {
     public String tipo;
     public int valor;
     public String spritePath;
+    public int precio;
 }
 

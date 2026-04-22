@@ -6,5 +6,6 @@ public class DatosArmadura {
     public int defensa;
     public int peso;
     public String spritePath;
+    public int precio;
 }
 
