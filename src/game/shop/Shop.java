@@ -158,6 +158,11 @@ public class Shop {
 
         Item item = jugador.inventario.getItems().get(index);
 
+        if (jugador.estaEquipado(item)) {
+            System.out.println("No puedes vender un objeto que está equipado.");
+            return;
+        }
+
         int precioVenta = item.getPrecio() / 2;
 
         if (precioVenta <= 0) {

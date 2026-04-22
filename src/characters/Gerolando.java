@@ -18,7 +18,7 @@ public class Gerolando {
 
     public Gerolando() {
         this.inventario = new Inventario();
-        this.oro = 100;
+        this.oro = 0;
         this.progressionSystem = new ProgressionSystem();
         this.equipmentSystem = new EquipmentSystem();
         this.combatStats = new CombatStats(100, 5, 20, 3);
@@ -92,6 +92,18 @@ public class Gerolando {
 
     public EquipmentSystem getEquipmentSystem() {
         return equipmentSystem;
+    }
+
+    public boolean tieneArmaEquipada(Item item) {
+        return item != null && getArmaEquipada() != null && getArmaEquipada().equals(item);
+    }
+
+    public boolean tieneArmaduraEquipada(Item item) {
+        return item != null && getArmaduraEquipada() != null && getArmaduraEquipada().equals(item);
+    }
+
+    public boolean estaEquipado(Item item) {
+        return tieneArmaEquipada(item) || tieneArmaduraEquipada(item);
     }
 
     // =========================
