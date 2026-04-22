@@ -1,0 +1,31 @@
+[
+  {
+    "id": "pocion_vida_pequena",
+    "nombre": "Poción de Vida Pequeña",
+    "tipo": "vida",
+    "valor": 20,
+    "spritePath": "src/assets/sprites/pociones/pocion_vida_pequena.png"
+  },
+  {
+    "id": "pocion_vida_grande",
+    "nombre": "Poción de Vida Grande",
+    "tipo": "vida",
+    "valor": 50,
+    "spritePath": "src/assets/sprites/pociones/pocion_vida_grande.png"
+  },
+  {
+    "id": "pocion_mana_pequena",
+    "nombre": "Poción de Mana Pequeña",
+    "tipo": "mana",
+    "valor": 2,
+    "spritePath": "src/assets/sprites/pociones/pocion_mana_pequena.png"
+  },
+  {
+    "id": "pocion_mana_grande",
+    "nombre": "Poción de Mana Grande",
+    "tipo": "mana",
+    "valor": 5,
+    "spritePath": "src/assets/sprites/pociones/pocion_mana_grande.png"
+  }
+]
+

@@ -34,7 +34,10 @@ public class Combate {
         if (jugador.estaVivo()) {
             System.out.println("¡Ganaste el combate!");
             int xpGanada = enemigo.getVida() / 5;
+            int oroGanado = enemigo.getVida() / 10;
+
             jugador.ganarXP(xpGanada);
+            jugador.ganarOro(oroGanado);
         } else {
             System.out.println("Has sido derrotado...");
         }

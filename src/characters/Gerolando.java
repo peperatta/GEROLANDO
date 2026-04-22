@@ -5,10 +5,12 @@ import characters.stats.CombatStats;
 import game.progression.ProgressionSystem;
 import items.Arma;
 import items.Armadura;
+import items.Consumible;
 import items.Item;
 
 public class Gerolando {
     public Inventario inventario;
+    private int oro;
 
     private ProgressionSystem progressionSystem;
     private EquipmentSystem equipmentSystem;
@@ -16,7 +18,7 @@ public class Gerolando {
 
     public Gerolando() {
         this.inventario = new Inventario();
-
+        this.oro = 0;
         this.progressionSystem = new ProgressionSystem();
         this.equipmentSystem = new EquipmentSystem();
         this.combatStats = new CombatStats(100, 5, 20, 3);
@@ -58,7 +60,7 @@ public class Gerolando {
     }
 
     // =========================
-    // EQUIPO
+    // EQUIPO / ITEMS
     // =========================
     public void equiparArma(Arma arma) {
         equipmentSystem.equiparArma(arma);
@@ -69,6 +71,14 @@ public class Gerolando {
     }
 
     public void usarItem(Item item) {
+        if (item == null) return;
+
+        if (item instanceof Consumible) {
+            ((Consumible) item).usar(this);
+            inventario.eliminar(item);
+            return;
+        }
+
         equipmentSystem.usarItem(item);
     }
 
@@ -113,6 +123,36 @@ public class Gerolando {
 
     public boolean estaVivo() {
         return combatStats.estaVivo();
+    }
+
+    public void setVida(int vidaNueva) {
+        combatStats.setVidaActual(vidaNueva);
+    }
+
+    public void setMana(int manaNuevo) {
+        combatStats.setManaActual(manaNuevo);
+    }
+
+    public void curarVida(int cantidad) {
+        if (cantidad <= 0) return;
+
+        int vidaNueva = getVidaActual() + cantidad;
+        if (vidaNueva > getVidaMax()) {
+            vidaNueva = getVidaMax();
+        }
+
+        setVida(vidaNueva);
+    }
+
+    public void curarMana(int cantidad) {
+        if (cantidad <= 0) return;
+
+        int manaNuevo = getManaActual() + cantidad;
+        if (manaNuevo > getManaMax()) {
+            manaNuevo = getManaMax();
+        }
+
+        setMana(manaNuevo);
     }
 
     // =========================
@@ -167,6 +207,7 @@ public class Gerolando {
         System.out.println("XP: " + getXP());
         System.out.println("Ataque: " + getAtaque());
         System.out.println("Defensa: " + getDefensa());
+        System.out.println("Oro: " + getOro());
 
         if (getArmaEquipada() != null) {
             System.out.println("Arma equipada: " + getArmaEquipada().getNombre());
@@ -179,5 +220,30 @@ public class Gerolando {
         } else {
             System.out.println("No hay armadura equipada.");
         }
+    }
+
+    // =========================
+    // ORO
+    // =========================
+    public int getOro() {
+        return oro;
+    }
+
+    public void ganarOro(int cantidad) {
+        if (cantidad <= 0) return;
+        oro += cantidad;
+        System.out.println("Ganaste " + cantidad + " de oro.");
+    }
+
+    public boolean gastarOro(int cantidad) {
+        if (cantidad <= 0) return false;
+
+        if (oro >= cantidad) {
+            oro -= cantidad;
+            return true;
+        }
+
+        System.out.println("No tienes suficiente oro.");
+        return false;
     }
 }

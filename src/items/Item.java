@@ -1,5 +1,7 @@
 package items;
 
+import characters.Gerolando;
+
 public abstract class Item {
 
     protected String nombre;
@@ -13,4 +15,8 @@ public abstract class Item {
     }
 
     public abstract void usar();
+
+    public void usar(Gerolando jugador) {
+        usar();
+    }
 }
