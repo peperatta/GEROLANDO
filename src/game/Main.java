@@ -15,7 +15,6 @@ import data.model.DatosEnemigo;
 import data.model.DatosPocion;
 import items.Arma;
 import items.Armadura;
-import items.Pocion;
 
 import java.util.Map;
 
@@ -23,7 +22,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Cargar catálogos desde JSON
         Map<String, DatosArma> catalogoArma =
                 ArmaLoader.cargar("src/assets/data/armas.json");
         Map<String, DatosArmadura> catalogoArmadura =
@@ -33,31 +31,32 @@ public class Main {
         Map<String, DatosPocion> catalogoPocion =
                 PotionLoader.cargar("src/assets/data/pociones.json");
 
-        // Crear factories
-        ArmaFactory factory = new ArmaFactory(catalogoArma);
+        ArmaFactory armaFactory = new ArmaFactory(catalogoArma);
         ArmaduraFactory armaduraFactory = new ArmaduraFactory(catalogoArmadura);
         EnemigoFactory enemigoFactory = new EnemigoFactory(catalogoEnemigo);
         PotionFactory potionFactory = new PotionFactory(catalogoPocion);
 
-        // Crear items
-        Arma espadaHierro = factory.crear("espada_hierro");
-        Arma espadaMadera = factory.crear("espada_madera");
+        Arma espadaHierro = armaFactory.crear("espada_hierro");
+        Arma espadaMadera = armaFactory.crear("espada_madera");
         Armadura ropaVieja = armaduraFactory.crear("ropa_vieja");
-        Pocion potionVida = potionFactory.crear("pocion_vida_pequena");
-        Pocion potionMana = potionFactory.crear("pocion_mana_pequena");
 
         Gerolando gerolando = new Gerolando();
 
         gerolando.inventario.agregar(espadaHierro);
         gerolando.inventario.agregar(espadaMadera);
         gerolando.inventario.agregar(ropaVieja);
-        gerolando.inventario.agregar(potionVida);
-        gerolando.inventario.agregar(potionMana);
 
         gerolando.equiparArmadura(ropaVieja);
         gerolando.equiparArma(espadaHierro);
 
-        GameEngine engine = new GameEngine(gerolando, enemigoFactory);
+        GameEngine engine = new GameEngine(
+                gerolando,
+                enemigoFactory,
+                potionFactory,
+                armaFactory,
+                armaduraFactory
+        );
+
         engine.start();
     }
 }

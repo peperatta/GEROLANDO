@@ -2,7 +2,11 @@ package game;
 
 import characters.Enemigo;
 import characters.Gerolando;
+import data.factory.ArmaFactory;
+import data.factory.ArmaduraFactory;
 import data.factory.EnemigoFactory;
+import data.factory.PotionFactory;
+import game.shop.Shop;
 import game.world.Biome;
 import game.world.Biomes;
 import items.Item;
@@ -18,15 +22,21 @@ public class GameEngine {
     private Random random;
     private boolean running;
     private Biome biomeActual;
+    private Shop shop;
 
-    public GameEngine(Gerolando jugador, EnemigoFactory enemigoFactory) {
+    public GameEngine(Gerolando jugador,
+                      EnemigoFactory enemigoFactory,
+                      PotionFactory potionFactory,
+                      ArmaFactory armaFactory,
+                      ArmaduraFactory armaduraFactory) {
         this.jugador = jugador;
         this.enemigoFactory = enemigoFactory;
         this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.running = true;
         this.currentState = GameState.MENU;
-        this.biomeActual = Biomes.PLAYA; // zona inicial
+        this.biomeActual = Biomes.PLAYA;
+        this.shop = new Shop(potionFactory, armaFactory, armaduraFactory);
     }
 
     public void start() {
@@ -80,8 +90,9 @@ public class GameEngine {
         System.out.println("1. Avanzar");
         System.out.println("2. Ver estado");
         System.out.println("3. Ver inventario");
-        System.out.println("4. Cambiar de zona");
-        System.out.println("5. Salir");
+        System.out.println("4. Ir a la tienda");
+        System.out.println("5. Cambiar de zona");
+        System.out.println("6. Salir");
         System.out.print("Elige una opción: ");
 
         int opcion = scanner.nextInt();
@@ -97,9 +108,12 @@ public class GameEngine {
                 manejarInventario();
                 break;
             case 4:
-                cambiarZona();
+                shop.abrirTienda(jugador);
                 break;
             case 5:
+                cambiarZona();
+                break;
+            case 6:
                 running = false;
                 System.out.println("Saliendo del juego...");
                 break;
