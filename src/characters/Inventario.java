@@ -2,8 +2,8 @@ package characters;
 
 import java.util.ArrayList;
 import java.util.List;
-import items.Item;
-import items.TipoItem;
+
+import items.*;
 
 public class Inventario {
 
@@ -84,12 +84,28 @@ public class Inventario {
 
             String linea = (i + 1) + ". " + item.getNombre();
 
-            // 👉 AQUÍ es donde va el cambio de tipo
+            // Tipo
             linea += " (" + formatearTipo(item.getTipo()) + ")";
 
             // Equipado
             if (jugador.estaEquipado(item)) {
                 linea += " [EQUIPADO]";
+            }
+
+            // Stats
+            if (item instanceof Arma) {
+                Arma arma = (Arma) item;
+                linea += " ATK +" + arma.getAtaque();
+            }
+
+            if (item instanceof Armadura) {
+                Armadura armadura = (Armadura) item;
+                linea += " DEF +" + armadura.getDefensa();
+            }
+
+            if (item instanceof Pocion) {
+                Pocion p = (Pocion) item;
+                linea += " Cura " + p.getValor();
             }
 
             System.out.println(linea);
