@@ -168,7 +168,7 @@ public class GameEngine {
         }
 
         System.out.println("\n=== INVENTARIO ===");
-        jugador.inventario.mostrarInventario();
+        jugador.inventario.mostrarInventario(jugador);
         System.out.println("0. Cancelar");
         System.out.print("Selecciona un item por número para usar/equipar: ");
 

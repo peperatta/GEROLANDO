@@ -157,7 +157,7 @@ public class Shop {
         }
 
         System.out.println("\n=== VENDER ITEMS ===");
-        jugador.inventario.mostrarInventario();
+        jugador.inventario.mostrarInventario(jugador);
         System.out.println("0. Cancelar");
         System.out.print("Selecciona un item por número para vender: ");
 
@@ -212,7 +212,7 @@ public class Shop {
     }
     private void reemplazarItemDelInventario(Gerolando jugador, Item nuevoItem, int precioPagado) {
         System.out.println("\n=== INVENTARIO LLENO ===");
-        jugador.inventario.mostrarInventario();
+        jugador.inventario.mostrarInventario(jugador);
         System.out.println("0. Cancelar");
         System.out.print("Selecciona el objeto que quieres reemplazar: ");
 

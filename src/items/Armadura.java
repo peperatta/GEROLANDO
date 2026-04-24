@@ -20,6 +20,10 @@ public class Armadura extends Item{
     }
 
     @Override
+    public TipoItem getTipo() {
+        return TipoItem.ARMADURA;
+    }
+    @Override
     public void usar() {
         System.out.println("Equipaste la armadura: " + nombre);
     }

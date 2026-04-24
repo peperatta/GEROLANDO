@@ -3,6 +3,7 @@ package characters;
 import java.util.ArrayList;
 import java.util.List;
 import items.Item;
+import items.TipoItem;
 
 public class Inventario {
 
@@ -72,14 +73,34 @@ public class Inventario {
         return true;
     }
 
-    public void mostrarInventario() {
+    public void mostrarInventario(Gerolando jugador) {
         if (items.isEmpty()) {
             System.out.println("Vacío");
             return;
         }
 
         for (int i = 0; i < items.size(); i++) {
-            System.out.println((i + 1) + ". " + items.get(i).getNombre());
+            Item item = items.get(i);
+
+            String linea = (i + 1) + ". " + item.getNombre();
+
+            // 👉 AQUÍ es donde va el cambio de tipo
+            linea += " (" + formatearTipo(item.getTipo()) + ")";
+
+            // Equipado
+            if (jugador.estaEquipado(item)) {
+                linea += " [EQUIPADO]";
+            }
+
+            System.out.println(linea);
+        }
+    }
+    private String formatearTipo(TipoItem tipo) {
+        switch (tipo) {
+            case ARMA: return "Arma";
+            case ARMADURA: return "Armadura";
+            case CONSUMIBLE: return "Consumible";
+            default: return "Desconocido";
         }
     }
 }

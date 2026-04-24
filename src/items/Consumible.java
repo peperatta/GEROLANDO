@@ -4,7 +4,7 @@ import characters.Gerolando;
 
 public abstract class Consumible extends Item {
 
-    protected String tipo;
+    public String tipo;
     protected int valor;
     protected String spritePath;
 
@@ -15,10 +15,6 @@ public abstract class Consumible extends Item {
         this.spritePath = spritePath;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
-
     public int getValor() {
         return valor;
     }
@@ -26,6 +22,7 @@ public abstract class Consumible extends Item {
     public String getSpritePath() {
         return spritePath;
     }
+
 
     @Override
     public void usar() {

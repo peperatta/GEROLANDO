@@ -102,7 +102,7 @@ public class Combate {
         }
 
         System.out.println("\n=== INVENTARIO ===");
-        jugador.inventario.mostrarInventario();
+        jugador.inventario.mostrarInventario(jugador);
         System.out.println("0. Cancelar");
         System.out.print("Selecciona un item por número para usar/equipar: ");
 
@@ -165,7 +165,7 @@ public class Combate {
 
     private static void manejarDropConInventarioLleno(Gerolando jugador, Item nuevoItem) {
         System.out.println("\n=== INVENTARIO LLENO ===");
-        jugador.inventario.mostrarInventario();
+        jugador.inventario.mostrarInventario(jugador);
         System.out.println("0. No recoger el objeto");
         System.out.print("Selecciona el objeto que quieres reemplazar: ");
 

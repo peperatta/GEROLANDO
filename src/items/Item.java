@@ -20,6 +20,7 @@ public abstract class Item {
     }
 
     public abstract void usar();
+    public abstract TipoItem getTipo();
 
     public void usar(Gerolando jugador) {
         usar();

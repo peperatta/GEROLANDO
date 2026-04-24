@@ -7,7 +7,10 @@ public class Pocion extends Consumible {
     public Pocion(String nombre, int precio, String tipo, int valor, String spritePath) {
         super(nombre, precio, tipo, valor, spritePath);
     }
-
+    @Override
+    public TipoItem getTipo() {
+        return TipoItem.CONSUMIBLE;
+    }
     @Override
     public void usar(Gerolando jugador) {
         if (jugador == null) return;

@@ -21,6 +21,10 @@ public abstract class Arma extends Item {
     public int getPeso() {
         return peso;
     }
+    @Override
+    public TipoItem getTipo() {
+        return TipoItem.ARMA;
+    }
 
     public abstract void usar();
 }
