@@ -60,6 +60,7 @@ public class Main {
                 armaduraFactory
         );
 
-        engine.start();
+        ConsoleGameRunner runner = new ConsoleGameRunner(engine);
+        runner.start();
     }
 }
