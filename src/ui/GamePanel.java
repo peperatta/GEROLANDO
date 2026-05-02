@@ -10,6 +10,7 @@ import items.Item;
 import ui.battle.BattleOverlayRenderer;
 import world.map.MapLoader;
 import world.map.TileMap;
+import ui.battle.BattleMessageQueue;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -35,6 +36,10 @@ public class GamePanel extends JPanel {
     private static final int SCREEN_ROWS = 12;
     private static final int WIDTH = TILE_SIZE * SCREEN_COLS;
     private static final int HEIGHT = TILE_SIZE * SCREEN_ROWS;
+    private BattleMessageQueue battleMessageQueue = new BattleMessageQueue();
+
+    private boolean combateTerminadoPendiente = false;
+    private boolean jugadorGanoPendiente = false;
 
     private enum GameViewState {
         EXPLORATION,
@@ -44,7 +49,8 @@ public class GamePanel extends JPanel {
     private enum BattleMenuMode {
         COMMAND,
         INVENTORY,
-        STATUS
+        STATUS,
+        MESSAGE
     }
 
     private GameEngine engine;
@@ -205,6 +211,11 @@ public class GamePanel extends JPanel {
     private void confirmarAccion() {
         if (currentView != GameViewState.COMBAT) return;
 
+        if (battleMenuMode == BattleMenuMode.MESSAGE) {
+            avanzarMensajeCombate();
+            return;
+        }
+
         if (battleMenuMode == BattleMenuMode.COMMAND) {
             confirmarComando();
             return;
@@ -217,6 +228,10 @@ public class GamePanel extends JPanel {
 
     private void cancelarAccion() {
         if (currentView == GameViewState.COMBAT) {
+            if (battleMenuMode == BattleMenuMode.MESSAGE) {
+                return;
+            }
+
             battleMenuMode = BattleMenuMode.COMMAND;
             battleMessage = "Elige un comando.";
             repaint();
@@ -249,42 +264,42 @@ public class GamePanel extends JPanel {
 
         CombatResult result = combatSystem.atacar();
 
-        battleMessage = result.getMensaje().isEmpty()
-                ? "Gerolando atacó."
-                : result.getMensaje();
+        StringBuilder mensajes = new StringBuilder();
+        mensajes.append("Gerolando ataca.");
 
-        if (result.isCombateTerminado()) {
-            terminarCombate(result.isJugadorGano());
-            return;
+        if (!result.getMensaje().isEmpty()) {
+            mensajes.append("\n").append(result.getMensaje());
         }
 
-        battleMenuMode = BattleMenuMode.COMMAND;
-        repaint();
+        if (result.isCombateTerminado()) {
+            marcarCombateTerminado(result.isJugadorGano());
+        }
+
+        mostrarMensajesDeCombate(mensajes.toString());
     }
 
     private void usarItemSeleccionado() {
         if (combatSystem == null) return;
 
         if (engine.getJugador().inventario.size() == 0) {
-            battleMessage = "El inventario está vacío.";
-            battleMenuMode = BattleMenuMode.COMMAND;
-            repaint();
+            mostrarMensajesDeCombate("El inventario está vacío.");
             return;
         }
 
         CombatResult result = combatSystem.usarItem(selectedItem);
 
-        battleMessage = result.getMensaje().isEmpty()
-                ? "Usaste un item."
-                : result.getMensaje();
+        StringBuilder mensajes = new StringBuilder();
+        mensajes.append("Usaste un item.");
 
-        if (result.isCombateTerminado()) {
-            terminarCombate(result.isJugadorGano());
-            return;
+        if (!result.getMensaje().isEmpty()) {
+            mensajes.append("\n").append(result.getMensaje());
         }
 
-        battleMenuMode = BattleMenuMode.COMMAND;
-        repaint();
+        if (result.isCombateTerminado()) {
+            marcarCombateTerminado(result.isJugadorGano());
+        }
+
+        mostrarMensajesDeCombate(mensajes.toString());
     }
 
     private void moverJugador(int colDelta, int rowDelta) {
@@ -492,5 +507,72 @@ public class GamePanel extends JPanel {
         g2.setColor(Color.WHITE);
         g2.drawString("Pantalla: " + screenCol + "," + screenRow, 8, 14);
         g2.drawString("Pos: " + playerCol + "," + playerRow, 8, 28);
+    }
+    private void mostrarMensajesDeCombate(String texto) {
+        battleMessageQueue.limpiar();
+        battleMessageQueue.agregarLineas(texto);
+
+        if (!battleMessageQueue.estaVacia()) {
+            battleMessage = battleMessageQueue.siguiente();
+            battleMenuMode = BattleMenuMode.MESSAGE;
+        } else {
+            battleMessage = "Elige un comando.";
+            battleMenuMode = BattleMenuMode.COMMAND;
+        }
+
+        repaint();
+    }
+
+    private void avanzarMensajeCombate() {
+        if (!battleMessageQueue.estaVacia()) {
+            battleMessage = battleMessageQueue.siguiente();
+            repaint();
+            return;
+        }
+
+        if (combateTerminadoPendiente) {
+            finalizarCombatePendiente();
+            return;
+        }
+
+        battleMessage = "Elige un comando.";
+        battleMenuMode = BattleMenuMode.COMMAND;
+        repaint();
+    }
+
+    private void marcarCombateTerminado(boolean jugadorGano) {
+        this.combateTerminadoPendiente = true;
+        this.jugadorGanoPendiente = jugadorGano;
+    }
+
+    private void finalizarCombatePendiente() {
+        if (jugadorGanoPendiente) {
+            LootResult lootResult = engine.getLootSystem()
+                    .procesarRecompensas(engine.getJugador(), combatSystem.getEnemigo());
+
+            if (!lootResult.getMensaje().isEmpty()) {
+                JOptionPane.showMessageDialog(this, lootResult.getMensaje());
+            }
+
+            if (lootResult.tieneDrop()) {
+                manejarDropConInventarioLleno(lootResult.getItemDropeado());
+            }
+        }
+
+        engine.finalizarCombate(engine.getJugador().estaVivo());
+
+        currentView = GameViewState.EXPLORATION;
+        battleMenuMode = BattleMenuMode.COMMAND;
+        combatSystem = null;
+        enemySprite = null;
+        battleBackground = null;
+
+        combateTerminadoPendiente = false;
+        jugadorGanoPendiente = false;
+
+        battleMessageQueue.limpiar();
+        battleMessage = "Elige un comando.";
+
+        repaint();
     }
 }

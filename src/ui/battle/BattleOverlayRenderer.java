@@ -147,6 +147,7 @@ public class BattleOverlayRenderer {
             g2.drawString("Elige un comando.", x + 12, y + 28);
         } else {
             drawWrappedText(g2, message, x + 12, y + 22, w - 24);
+            g2.drawString("ENTER para continuar", x + 12, y + 60);
         }
     }
 
