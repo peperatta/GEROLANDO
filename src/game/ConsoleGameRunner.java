@@ -107,7 +107,13 @@ public class ConsoleGameRunner {
                 System.out.println("Opción no válida.");
         }
     }
+    private void procesarRecompensas(Enemigo enemigo) {
+        int xpGanada = enemigo.getVida() / 5;
+        int oroGanado = enemigo.getVida() / 3;
 
+        engine.getJugador().ganarXP(xpGanada);
+        engine.getJugador().ganarOro(oroGanado);
+    }
     private void manejarAvance() {
         ExplorationResult result = engine.avanzar();
 
@@ -116,7 +122,14 @@ public class ConsoleGameRunner {
         if (result.hayEncuentro()) {
             Enemigo enemigo = result.getEnemigo();
 
-            Combate.iniciarCombate(engine.getJugador(), enemigo);
+            game.combat.ConsoleCombatRunner combatRunner =
+                    new game.combat.ConsoleCombatRunner(engine.getJugador(), enemigo);
+
+            boolean jugadorGano = combatRunner.iniciar();
+
+            if (jugadorGano) {
+                procesarRecompensas(enemigo);
+            }
 
             engine.finalizarCombate(engine.getJugador().estaVivo());
         }
