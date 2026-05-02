@@ -86,7 +86,7 @@ public class CombatSystem {
         }
 
         turnoJugador = true;
-        return new CombatResult("Turno de Gerolando.", false, false);
+        return new CombatResult("", false, false);
     }
 
     public Gerolando getJugador() {

@@ -24,7 +24,9 @@ public class ConsoleCombatRunner {
             if (combatSystem.esTurnoJugador()) {
                 CombatResult result = turnoJugador();
 
-                System.out.println(result.getMensaje());
+                if (!result.getMensaje().isEmpty()) {
+                    System.out.println(result.getMensaje());
+                }
 
                 if (result.isCombateTerminado()) {
                     combateActivo = false;

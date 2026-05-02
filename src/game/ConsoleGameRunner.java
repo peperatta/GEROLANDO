@@ -4,6 +4,8 @@ import characters.Enemigo;
 import characters.Gerolando;
 import game.world.Biomes;
 import items.Item;
+import game.loot.LootResult;
+import items.Item;
 
 import java.util.Scanner;
 
@@ -107,13 +109,6 @@ public class ConsoleGameRunner {
                 System.out.println("Opción no válida.");
         }
     }
-    private void procesarRecompensas(Enemigo enemigo) {
-        int xpGanada = enemigo.getVida() / 5;
-        int oroGanado = enemigo.getVida() / 3;
-
-        engine.getJugador().ganarXP(xpGanada);
-        engine.getJugador().ganarOro(oroGanado);
-    }
     private void manejarAvance() {
         ExplorationResult result = engine.avanzar();
 
@@ -128,7 +123,12 @@ public class ConsoleGameRunner {
             boolean jugadorGano = combatRunner.iniciar();
 
             if (jugadorGano) {
-                procesarRecompensas(enemigo);
+                LootResult lootResult = engine.getLootSystem().procesarRecompensas(engine.getJugador(), enemigo);
+                System.out.println(lootResult.getMensaje());
+
+                if (lootResult.tieneDrop()) {
+                    manejarDropConInventarioLleno(lootResult.getItemDropeado());
+                }
             }
 
             engine.finalizarCombate(engine.getJugador().estaVivo());
@@ -206,5 +206,44 @@ public class ConsoleGameRunner {
         } else {
             System.out.println("Opción no válida.");
         }
+    }
+    private void manejarDropConInventarioLleno(Item nuevoItem) {
+        Gerolando jugador = engine.getJugador();
+
+        System.out.println("\n=== INVENTARIO LLENO ===");
+        jugador.inventario.mostrarInventario(jugador);
+        System.out.println("0. No recoger el objeto");
+        System.out.print("Selecciona el objeto que quieres reemplazar: ");
+
+        int opcion = scanner.nextInt();
+
+        if (opcion == 0) {
+            System.out.println("Dejaste " + nuevoItem.getNombre() + " en el suelo.");
+            return;
+        }
+
+        int index = opcion - 1;
+
+        if (index < 0 || index >= jugador.inventario.size()) {
+            System.out.println("Índice no válido. No recogiste el objeto.");
+            return;
+        }
+
+        Item itemAnterior = jugador.inventario.getItem(index);
+
+        if (jugador.estaEquipado(itemAnterior)) {
+            System.out.println("No puedes reemplazar un objeto que está equipado.");
+            System.out.println("No recogiste " + nuevoItem.getNombre() + ".");
+            return;
+        }
+
+        boolean reemplazado = jugador.inventario.reemplazarItem(index, nuevoItem);
+
+        if (!reemplazado) {
+            System.out.println("No se pudo reemplazar el objeto.");
+            return;
+        }
+
+        System.out.println("Reemplazaste " + itemAnterior.getNombre() + " por " + nuevoItem.getNombre() + ".");
     }
 }

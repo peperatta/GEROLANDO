@@ -10,11 +10,13 @@ import game.shop.Shop;
 import game.world.Biome;
 import game.world.Biomes;
 import items.Item;
+import game.loot.LootSystem;
 
 import java.util.Random;
 
 public class GameEngine {
     private GameState currentState;
+    private LootSystem lootSystem;
     private Gerolando jugador;
     private EnemigoFactory enemigoFactory;
     private Random random;
@@ -34,6 +36,7 @@ public class GameEngine {
         this.currentState = GameState.MENU;
         this.biomeActual = Biomes.PLAYA;
         this.shop = new Shop(potionFactory, armaFactory, armaduraFactory);
+        this.lootSystem = new LootSystem(potionFactory, armaFactory, armaduraFactory);
     }
 
     public String iniciarPartida() {
@@ -136,5 +139,9 @@ public class GameEngine {
 
     public Shop getShop() {
         return shop;
+    }
+
+    public LootSystem getLootSystem() {
+        return lootSystem;
     }
 }

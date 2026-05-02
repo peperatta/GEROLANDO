@@ -36,7 +36,6 @@ public class Main {
         EnemigoFactory enemigoFactory = new EnemigoFactory(catalogoEnemigo);
         PotionFactory potionFactory = new PotionFactory(catalogoPocion);
 
-        Combate.configurarDrops(potionFactory, armaFactory, armaduraFactory);
 
         Arma paloMadera = armaFactory.crear("palo_madera");
         Arma espadaHierro = armaFactory.crear("espada_hierro");
