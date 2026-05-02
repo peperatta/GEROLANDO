@@ -22,13 +22,14 @@ public class BattleOverlayRenderer {
                      int selectedCommand,
                      int selectedItem,
                      String menuMode,
-                     String message) {
+                     String message,
+                     boolean showArrow){
 
         drawBattleWindow(g2, width, height, battleBackground);
         drawStatsPanel(g2, combatSystem.getJugador());
         drawEnemy(g2, width, enemySprite, combatSystem);
         drawCommandPanel(g2, selectedCommand, menuMode);
-        drawBottomPanel(g2, width, height, combatSystem, selectedItem, menuMode, message);
+        drawBottomPanel(g2, width, height, combatSystem, selectedItem, menuMode, message, showArrow);
     }
 
     private void drawBattleWindow(Graphics2D g2, int width, int height, BufferedImage battleBackground) {
@@ -119,7 +120,8 @@ public class BattleOverlayRenderer {
                                  CombatSystem combatSystem,
                                  int selectedItem,
                                  String menuMode,
-                                 String message) {
+                                 String message,
+                                 boolean showArrow) {
         int x = 15;
         int y = height - 85;
         int w = width - 30;
@@ -147,7 +149,10 @@ public class BattleOverlayRenderer {
             g2.drawString("Elige un comando.", x + 12, y + 28);
         } else {
             drawWrappedText(g2, message, x + 12, y + 22, w - 24);
-            g2.drawString("ENTER para continuar", x + 12, y + 60);
+
+            if (showArrow) {
+                g2.drawString("▼", x + w - 22, y + h - 12);
+            }
         }
     }
 

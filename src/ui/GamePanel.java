@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.Timer;
 
 public class GamePanel extends JPanel {
 
@@ -78,6 +79,14 @@ public class GamePanel extends JPanel {
     private BufferedImage player;
     private BufferedImage enemySprite;
     private BufferedImage battleBackground;
+    private String fullBattleMessage = "";
+    private String visibleBattleMessage = "";
+    private int messageCharIndex = 0;
+    private Timer messageTimer;
+
+    private boolean messageFinished = true;
+    private boolean arrowVisible = false;
+    private Timer arrowBlinkTimer;
 
     public GamePanel(GameEngine engine) {
         this.engine = engine;
@@ -89,6 +98,7 @@ public class GamePanel extends JPanel {
         cargarMapa();
         cargarImagenes();
         configurarControles();
+        configurarTimersMensaje();
     }
 
     private void cargarMapa() {
@@ -423,7 +433,8 @@ public class GamePanel extends JPanel {
                     selectedCommand,
                     selectedItem,
                     battleMenuMode.name(),
-                    battleMessage
+                    battleMessage,
+                    arrowVisible
             );
         }
 
@@ -513,8 +524,8 @@ public class GamePanel extends JPanel {
         battleMessageQueue.agregarLineas(texto);
 
         if (!battleMessageQueue.estaVacia()) {
-            battleMessage = battleMessageQueue.siguiente();
             battleMenuMode = BattleMenuMode.MESSAGE;
+            iniciarTextoTypewriter(battleMessageQueue.siguiente());
         } else {
             battleMessage = "Elige un comando.";
             battleMenuMode = BattleMenuMode.COMMAND;
@@ -524,9 +535,13 @@ public class GamePanel extends JPanel {
     }
 
     private void avanzarMensajeCombate() {
+        if (!messageFinished) {
+            completarMensajeActual();
+            return;
+        }
+
         if (!battleMessageQueue.estaVacia()) {
-            battleMessage = battleMessageQueue.siguiente();
-            repaint();
+            iniciarTextoTypewriter(battleMessageQueue.siguiente());
             return;
         }
 
@@ -536,7 +551,12 @@ public class GamePanel extends JPanel {
         }
 
         battleMessage = "Elige un comando.";
+        visibleBattleMessage = battleMessage;
+        fullBattleMessage = battleMessage;
         battleMenuMode = BattleMenuMode.COMMAND;
+        messageFinished = true;
+        arrowVisible = false;
+
         repaint();
     }
 
@@ -574,5 +594,60 @@ public class GamePanel extends JPanel {
         battleMessage = "Elige un comando.";
 
         repaint();
+    }
+    private void configurarTimersMensaje() {
+        messageTimer = new Timer(35, e -> avanzarLetraMensaje());
+
+        arrowBlinkTimer = new Timer(450, e -> {
+            if (messageFinished && battleMenuMode == BattleMenuMode.MESSAGE) {
+                arrowVisible = !arrowVisible;
+                repaint();
+            }
+        });
+
+        arrowBlinkTimer.start();
+    }
+    private void iniciarTextoTypewriter(String mensaje) {
+        fullBattleMessage = mensaje == null ? "" : mensaje;
+        visibleBattleMessage = "";
+        messageCharIndex = 0;
+        messageFinished = false;
+        arrowVisible = false;
+
+        battleMessage = visibleBattleMessage;
+
+        if (messageTimer.isRunning()) {
+            messageTimer.stop();
+        }
+
+        messageTimer.start();
+        repaint();
+    }
+
+    private void avanzarLetraMensaje() {
+        if (messageCharIndex < fullBattleMessage.length()) {
+            visibleBattleMessage += fullBattleMessage.charAt(messageCharIndex);
+            messageCharIndex++;
+            battleMessage = visibleBattleMessage;
+            repaint();
+            return;
+        }
+
+        messageTimer.stop();
+        messageFinished = true;
+        arrowVisible = true;
+        repaint();
+    }
+
+    private void completarMensajeActual() {
+        if (!messageFinished) {
+            messageTimer.stop();
+            visibleBattleMessage = fullBattleMessage;
+            battleMessage = visibleBattleMessage;
+            messageCharIndex = fullBattleMessage.length();
+            messageFinished = true;
+            arrowVisible = true;
+            repaint();
+        }
     }
 }
