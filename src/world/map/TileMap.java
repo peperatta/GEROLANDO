@@ -33,10 +33,15 @@ public class TileMap {
         }
 
         int tile = getTile(row, col);
-
-        // 0 = pasto caminable
+//PLAYA 0-9
+        // 0 = arena caminable
         // 1 = pared bloqueada
         // 2 = agua bloqueada
-        return tile != 1 && tile != 2;
+        // 3 = piedra bloqueada (en arena)
+//BOSQUE 10-19
+        // 10 = pasto caminable
+//BOSQUE 20-29
+        // 20 = roca caminable
+        return tile != 1 && tile != 2 && tile != 3;
     }
 }

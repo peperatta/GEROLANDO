@@ -35,12 +35,22 @@ public class GamePanel extends JPanel {
     private static final int TILE_SIZE = 20;
     private static final int SCREEN_COLS = 16;
     private static final int SCREEN_ROWS = 12;
-    private static final int WIDTH = TILE_SIZE * SCREEN_COLS;
-    private static final int HEIGHT = TILE_SIZE * SCREEN_ROWS;
+    private static final int INTERNAL_WIDTH = TILE_SIZE * SCREEN_COLS;
+    private static final int INTERNAL_HEIGHT = TILE_SIZE * SCREEN_ROWS;
+    private int enemyShakeOffsetX = 0;
+    private int enemyShakeTicks = 0;
+    private javax.swing.Timer enemyShakeTimer;
+    private static final int SCALE = 2;
+
+    private static final int WIDTH = INTERNAL_WIDTH * SCALE;
+    private static final int HEIGHT = INTERNAL_HEIGHT * SCALE;
+    private BufferedImage screenBuffer;
     private BattleMessageQueue battleMessageQueue = new BattleMessageQueue();
 
     private boolean combateTerminadoPendiente = false;
     private boolean jugadorGanoPendiente = false;
+    private long lastMoveTime = 0;
+    private static final long MOVE_COOLDOWN_MS = 170;
 
     private enum GameViewState {
         EXPLORATION,
@@ -74,11 +84,19 @@ public class GamePanel extends JPanel {
 
     private String battleMessage = "Elige un comando.";
 
+    //PLAYA
     private BufferedImage sand;
+    private BufferedImage sand2;
     private BufferedImage wall;
     private BufferedImage water;
+
+    //CUEVA
     private BufferedImage stone;
+
+    //BOSQUE
     private BufferedImage grass;
+
+
     private BufferedImage player;
     private BufferedImage enemySprite;
     private BufferedImage battleBackground;
@@ -97,19 +115,46 @@ public class GamePanel extends JPanel {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(Color.BLACK);
         setFocusable(true);
+        screenBuffer = new BufferedImage(INTERNAL_WIDTH, INTERNAL_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
         cargarMapa();
         cargarImagenes();
         configurarControles();
         configurarTimersMensaje();
+        configurarEnemyShake();
     }
+    private void configurarEnemyShake() {
+        enemyShakeTimer = new javax.swing.Timer(40, e -> {
+            if (enemyShakeTicks <= 0) {
+                enemyShakeOffsetX = 0;
+                enemyShakeTimer.stop();
+                repaint();
+                return;
+            }
 
+            enemyShakeOffsetX = (enemyShakeTicks % 2 == 0) ? 3 : -3;
+            enemyShakeTicks--;
+
+            repaint();
+        });
+    }
+    private void iniciarEnemyShake() {
+        enemyShakeTicks = 8;
+        enemyShakeOffsetX = 3;
+
+        if (enemyShakeTimer.isRunning()) {
+            enemyShakeTimer.stop();
+        }
+
+        enemyShakeTimer.start();
+    }
     private void cargarMapa() {
         mapa = MapLoader.cargar("/assets/maps/overworld.txt");
     }
 
     private void cargarImagenes() {
         sand = cargarImagenResource("/assets/tiles/sand.png");
+        sand2 = cargarImagenResource("/assets/tiles/sand_stone.png");
         wall = cargarImagenResource("/assets/tiles/wall.png");
         water = cargarImagenResource("/assets/tiles/water.png");
         grass = cargarImagenResource("/assets/tiles/grass.png");
@@ -305,6 +350,7 @@ public class GamePanel extends JPanel {
         if (combatSystem == null) return;
 
         CombatResult result = combatSystem.atacar();
+        iniciarEnemyShake();
 
         if (result.isCombateTerminado()) {
             marcarCombateTerminado(result.isJugadorGano());
@@ -335,6 +381,14 @@ public class GamePanel extends JPanel {
     private void moverJugador(int colDelta, int rowDelta) {
         if (currentView != GameViewState.EXPLORATION) return;
 
+        long now = System.currentTimeMillis();
+
+        if (now - lastMoveTime < MOVE_COOLDOWN_MS) {
+            return;
+        }
+
+        lastMoveTime = now;
+
         int nuevaCol = playerCol + colDelta;
         int nuevaRow = playerRow + rowDelta;
 
@@ -344,8 +398,10 @@ public class GamePanel extends JPanel {
 
         playerCol = nuevaCol;
         playerRow = nuevaRow;
+
         int tileActual = mapa.getTile(playerRow, playerCol);
         engine.actualizarBiomePorTile(tileActual);
+
         actualizarPantallaActual();
 
         ExplorationResult result = engine.avanzar();
@@ -433,21 +489,24 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D bufferGraphics = screenBuffer.createGraphics();
 
-        g2.setRenderingHint(
+        bufferGraphics.setRenderingHint(
                 RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
         );
 
-        dibujarMapa(g2);
-        dibujarJugador(g2);
+        bufferGraphics.setColor(Color.BLACK);
+        bufferGraphics.fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
+
+        dibujarMapa(bufferGraphics);
+        dibujarJugador(bufferGraphics);
 
         if (currentView == GameViewState.COMBAT && combatSystem != null) {
             battleRenderer.draw(
-                    g2,
-                    WIDTH,
-                    HEIGHT,
+                    bufferGraphics,
+                    INTERNAL_WIDTH,
+                    INTERNAL_HEIGHT,
                     combatSystem,
                     enemySprite,
                     battleBackground,
@@ -456,11 +515,23 @@ public class GamePanel extends JPanel {
                     inventoryScrollOffset,
                     battleMenuMode.name(),
                     battleMessage,
-                    arrowVisible
+                    arrowVisible,
+                    enemyShakeOffsetX
             );
         }
 
-        dibujarDebug(g2);
+        dibujarDebug(bufferGraphics);
+
+        bufferGraphics.dispose();
+
+        Graphics2D g2 = (Graphics2D) g;
+
+        g2.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+        );
+
+        g2.drawImage(screenBuffer, 0, 0, WIDTH, HEIGHT, null);
     }
 
     private void dibujarMapa(Graphics2D g2) {
@@ -506,8 +577,10 @@ public class GamePanel extends JPanel {
             case 0:
                 return sand;
             case 3:
+                return sand2;
+            case 10:
                 return grass;
-            case 4:
+            case 20:
                 return stone;
             default:
                 return grass;

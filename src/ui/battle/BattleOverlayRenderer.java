@@ -26,11 +26,11 @@ public class BattleOverlayRenderer {
                      int inventoryScrollOffset,
                      String menuMode,
                      String message,
-                     boolean showArrow){
+                     boolean showArrow, int enemyShakeOffsetX){
 
         drawBattleWindow(g2, width, height, battleBackground);
         drawStatsPanel(g2, combatSystem.getJugador());
-        drawEnemy(g2, width, enemySprite, combatSystem);
+        drawEnemy(g2, width, enemySprite, combatSystem, enemyShakeOffsetX);
         drawCommandPanel(g2, selectedCommand, menuMode);
         drawBottomPanel(g2, width, height, combatSystem, selectedItem, inventoryScrollOffset, menuMode, message, showArrow);
     }
@@ -73,9 +73,9 @@ public class BattleOverlayRenderer {
         g2.drawString("G  " + jugador.getOro(), x + 8, y + 82);
     }
 
-    private void drawEnemy(Graphics2D g2, int width, BufferedImage enemySprite, CombatSystem combatSystem) {
+    private void drawEnemy(Graphics2D g2, int width, BufferedImage enemySprite, CombatSystem combatSystem, int enemyShakeOffsetX) {
         int enemySize = 46;
-        int x = (width - enemySize) / 2;
+        int x = ((width - enemySize) / 2) + enemyShakeOffsetX;
         int y = 80;
 
         if (enemySprite != null) {
