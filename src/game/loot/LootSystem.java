@@ -44,7 +44,7 @@ public class LootSystem {
         if (!jugador.inventario.estaLleno()) {
             jugador.inventario.agregar(drop);
             mensaje.append("\n").append(drop.getNombre()).append(" fue agregado al inventario.");
-            return new LootResult(mensaje.toString(), null);
+            return new LootResult(mensaje.toString(), drop);
         }
 
         mensaje.append("\nEl inventario está lleno.");

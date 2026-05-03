@@ -31,14 +31,13 @@ public class CombatSystem {
             return new CombatResult("No es turno de Gerolando.", false, false);
         }
 
-        StringBuilder mensaje = new StringBuilder();
-
         int vidaAntes = enemigo.vidaActual;
 
         jugador.atacar(enemigo);
 
         int danoReal = vidaAntes - enemigo.vidaActual;
 
+        StringBuilder mensaje = new StringBuilder();
         mensaje.append("Gerolando atacó.\n");
         mensaje.append(enemigo.nombre).append(" recibió ").append(danoReal).append(" de daño.");
 
@@ -47,18 +46,31 @@ public class CombatSystem {
             return new CombatResult(mensaje.toString(), true, true);
         }
 
+        //  IMPORTANTE
         turnoJugador = false;
 
-        CombatResult resultadoEnemigo = turnoEnemigo();
-        mensaje.append("\n").append(resultadoEnemigo.getMensaje());
-
-        return new CombatResult(
-                mensaje.toString(),
-                resultadoEnemigo.isCombateTerminado(),
-                resultadoEnemigo.isJugadorGano()
-        );
+        return new CombatResult(mensaje.toString(), false, false);
     }
+    public CombatResult turnoEnemigoSeparado() {
+        int vidaAntes = jugador.getVidaActual();
 
+        enemigo.atacar(jugador);
+
+        int danoReal = vidaAntes - jugador.getVidaActual();
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append(enemigo.nombre).append(" atacó.\n");
+        mensaje.append("Gerolando recibió ").append(danoReal).append(" de daño.");
+
+        if (!jugador.estaVivo()) {
+            mensaje.append("\nHas sido derrotado...");
+            return new CombatResult(mensaje.toString(), true, false);
+        }
+
+        turnoJugador = true;
+
+        return new CombatResult(mensaje.toString(), false, false);
+    }
     public CombatResult usarItem(int itemIndex) {
         if (!turnoJugador) {
             return new CombatResult("No es turno de Gerolando.", false, false);

@@ -26,15 +26,36 @@ public class BattleOverlayRenderer {
                      int inventoryScrollOffset,
                      String menuMode,
                      String message,
-                     boolean showArrow, int enemyShakeOffsetX){
+                     boolean showArrow,
+                     int enemyShakeOffsetX,
+                     int vidaVisualJugador,
+                     int manaVisualJugador,
+                     BufferedImage dropSprite,
+                     boolean mostrandoDrop){
 
         drawBattleWindow(g2, width, height, battleBackground);
-        drawStatsPanel(g2, combatSystem.getJugador());
-        drawEnemy(g2, width, enemySprite, combatSystem, enemyShakeOffsetX);
+        drawStatsPanel(g2, combatSystem.getJugador(), vidaVisualJugador, manaVisualJugador);
+        if (mostrandoDrop) {
+            drawDrop(g2, width, dropSprite);
+        } else {
+            drawEnemy(g2, width, enemySprite, combatSystem, enemyShakeOffsetX);
+        }
         drawCommandPanel(g2, selectedCommand, menuMode);
         drawBottomPanel(g2, width, height, combatSystem, selectedItem, inventoryScrollOffset, menuMode, message, showArrow);
     }
+    private void drawDrop(Graphics2D g2, int width, BufferedImage dropSprite) {
+        int itemSize = 20;
+        int x = (width - itemSize) / 2;
+        int y = 88;
 
+        if (dropSprite != null) {
+            g2.drawImage(dropSprite, x, y, itemSize, itemSize, null);
+        } else {
+            g2.setColor(Color.YELLOW);
+            g2.fillRect(x, y, itemSize, itemSize);
+        }
+        
+    }
     private void drawBattleWindow(Graphics2D g2, int width, int height, BufferedImage battleBackground) {
         int x = 55;
         int y = 35;
@@ -55,7 +76,7 @@ public class BattleOverlayRenderer {
         }
     }
 
-    private void drawStatsPanel(Graphics2D g2, Gerolando jugador) {
+    private void drawStatsPanel(Graphics2D g2, Gerolando jugador, int vidaVisualJugador, int manaVisualJugador) {
         int x = 8;
         int y = 28;
         int w = 78;
@@ -68,8 +89,8 @@ public class BattleOverlayRenderer {
 
         g2.drawString("GEROLANDO", x + 8, y + 16);
         g2.drawString("LV " + jugador.getNivel(), x + 8, y + 34);
-        g2.drawString("HP " + jugador.getVidaActual() + "/" + jugador.getVidaMax(), x + 8, y + 50);
-        g2.drawString("MP " + jugador.getManaActual() + "/" + jugador.getManaMax(), x + 8, y + 66);
+        g2.drawString("HP " + vidaVisualJugador + "/" + jugador.getVidaMax(), x + 8, y + 50);
+        g2.drawString("MP " + manaVisualJugador + "/" + jugador.getManaMax(), x + 8, y + 66);
         g2.drawString("G  " + jugador.getOro(), x + 8, y + 82);
     }
 

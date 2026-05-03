@@ -37,11 +37,12 @@ public class TileMap {
         // 0 = arena caminable
         // 1 = pared bloqueada
         // 2 = agua bloqueada
-        // 3 = piedra bloqueada (en arena)
+        // 3 = piedra bloqueada
+        // 3 = concha bloqueada
 //BOSQUE 10-19
         // 10 = pasto caminable
 //BOSQUE 20-29
         // 20 = roca caminable
-        return tile != 1 && tile != 2 && tile != 3;
+        return tile != 1 && tile != 2 && tile != 3 && tile !=4;
     }
 }
