@@ -6,7 +6,7 @@ public class Biomes {
             "Playa",
             "Una costa tranquila con arena caliente y brisa marina.",
             new String[]{"finko"},
-            100
+            2
     );
 
     public static final Biome BOSQUE = new Biome(
@@ -14,7 +14,7 @@ public class Biomes {
             "Bosque",
             "Árboles densos, sombras largas y sonidos extraños.",
             new String[]{"calabazo"},
-            35
+            5
     );
 
     public static final Biome CUEVA = new Biome(
@@ -22,6 +22,6 @@ public class Biomes {
             "Cueva",
             "Oscura, húmeda y peligrosa. Algo se mueve entre las rocas.",
             new String[]{"diablo"},
-            40
+            10
     );
 }

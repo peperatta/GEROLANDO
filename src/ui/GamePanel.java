@@ -77,6 +77,8 @@ public class GamePanel extends JPanel {
     private BufferedImage sand;
     private BufferedImage wall;
     private BufferedImage water;
+    private BufferedImage stone;
+    private BufferedImage grass;
     private BufferedImage player;
     private BufferedImage enemySprite;
     private BufferedImage battleBackground;
@@ -110,6 +112,8 @@ public class GamePanel extends JPanel {
         sand = cargarImagenResource("/assets/tiles/sand.png");
         wall = cargarImagenResource("/assets/tiles/wall.png");
         water = cargarImagenResource("/assets/tiles/water.png");
+        grass = cargarImagenResource("/assets/tiles/grass.png");
+        stone = cargarImagenResource("/assets/tiles/stone.png");
         player = cargarImagenResource("/assets/sprites/player/gerolando.png");
     }
 
@@ -139,7 +143,7 @@ public class GamePanel extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke("DOWN"), "down");
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "left");
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "right");
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "enter");
+        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "space");
         inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
 
         actionMap.put("up", new AbstractAction() {
@@ -170,7 +174,7 @@ public class GamePanel extends JPanel {
             }
         });
 
-        actionMap.put("enter", new AbstractAction() {
+        actionMap.put("space", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 confirmarAccion();
@@ -340,7 +344,8 @@ public class GamePanel extends JPanel {
 
         playerCol = nuevaCol;
         playerRow = nuevaRow;
-
+        int tileActual = mapa.getTile(playerRow, playerCol);
+        engine.actualizarBiomePorTile(tileActual);
         actualizarPantallaActual();
 
         ExplorationResult result = engine.avanzar();
@@ -499,8 +504,13 @@ public class GamePanel extends JPanel {
             case 2:
                 return water;
             case 0:
-            default:
                 return sand;
+            case 3:
+                return grass;
+            case 4:
+                return stone;
+            default:
+                return grass;
         }
     }
 
@@ -510,6 +520,10 @@ public class GamePanel extends JPanel {
                 return Color.DARK_GRAY;
             case 2:
                 return Color.BLUE;
+            case 3:
+                return Color.GREEN;
+            case 4:
+                return Color.GRAY;
             case 0:
             default:
                 return new Color(50, 150, 70);

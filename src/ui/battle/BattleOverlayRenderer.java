@@ -84,14 +84,6 @@ public class BattleOverlayRenderer {
             g2.setColor(Color.MAGENTA);
             g2.fillOval(x, y, enemySize, enemySize);
         }
-
-        g2.setFont(new Font("Monospaced", Font.BOLD, 10));
-        g2.setColor(Color.WHITE);
-        g2.drawString(
-                combatSystem.getEnemigo().nombre,
-                x,
-                y + enemySize + 14
-        );
     }
 
     private void drawCommandPanel(Graphics2D g2, int selectedCommand, String menuMode) {

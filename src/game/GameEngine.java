@@ -144,4 +144,22 @@ public class GameEngine {
     public LootSystem getLootSystem() {
         return lootSystem;
     }
+    public void actualizarBiomePorTile(int tileId) {
+        switch (tileId) {
+            case 0:
+                this.biomeActual = Biomes.PLAYA;
+                break;
+
+            case 3:
+                this.biomeActual = Biomes.BOSQUE;
+                break;
+
+            case 4:
+                this.biomeActual = Biomes.CUEVA;
+                break;
+
+            default:
+                break;
+        }
+    }
 }
