@@ -2,7 +2,6 @@ package game.combat;
 
 import characters.Enemigo;
 import characters.Gerolando;
-import items.Item;
 
 public class CombatSystem {
     private Gerolando jugador;
@@ -16,19 +15,11 @@ public class CombatSystem {
     }
 
     public String iniciarCombate() {
-        StringBuilder mensaje = new StringBuilder();
-
-        mensaje.append("¡Comienza el combate contra ")
-                .append(enemigo.nombre)
-                .append("!\n");
-
         if (turnoJugador) {
-            mensaje.append("Gerolando es más rápido y ataca primero.");
-        } else {
-            mensaje.append(enemigo.nombre).append(" es más rápido y ataca primero.");
+            return "¡Apareció un " + enemigo.nombre + "!\nGerolando ataca primero.";
         }
 
-        return mensaje.toString();
+        return "¡Apareció un " + enemigo.nombre + "!\n" + enemigo.nombre + " ataca primero.";
     }
 
     public boolean esTurnoJugador() {
@@ -40,14 +31,32 @@ public class CombatSystem {
             return new CombatResult("No es turno de Gerolando.", false, false);
         }
 
+        StringBuilder mensaje = new StringBuilder();
+
+        int vidaAntes = enemigo.vidaActual;
+
         jugador.atacar(enemigo);
 
+        int danoReal = vidaAntes - enemigo.vidaActual;
+
+        mensaje.append("Gerolando atacó.\n");
+        mensaje.append(enemigo.nombre).append(" recibió ").append(danoReal).append(" de daño.");
+
         if (enemigo.vidaActual <= 0) {
-            return new CombatResult("¡Ganaste el combate!", true, true);
+            mensaje.append("\n¡Ganaste el combate!");
+            return new CombatResult(mensaje.toString(), true, true);
         }
 
         turnoJugador = false;
-        return turnoEnemigo();
+
+        CombatResult resultadoEnemigo = turnoEnemigo();
+        mensaje.append("\n").append(resultadoEnemigo.getMensaje());
+
+        return new CombatResult(
+                mensaje.toString(),
+                resultadoEnemigo.isCombateTerminado(),
+                resultadoEnemigo.isJugadorGano()
+        );
     }
 
     public CombatResult usarItem(int itemIndex) {
@@ -63,30 +72,43 @@ public class CombatSystem {
             return new CombatResult("Índice de item no válido.", false, false);
         }
 
-        Item item = jugador.inventario.getItems().get(itemIndex);
-        jugador.usarItem(item);
+        String nombreItem = jugador.inventario.getItems().get(itemIndex).getNombre();
 
-        if (enemigo.vidaActual <= 0) {
-            return new CombatResult("¡Ganaste el combate!", true, true);
-        }
+        jugador.usarItem(jugador.inventario.getItems().get(itemIndex));
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append("Gerolando usó ").append(nombreItem).append(".");
 
         turnoJugador = false;
-        return turnoEnemigo();
+
+        CombatResult resultadoEnemigo = turnoEnemigo();
+        mensaje.append("\n").append(resultadoEnemigo.getMensaje());
+
+        return new CombatResult(
+                mensaje.toString(),
+                resultadoEnemigo.isCombateTerminado(),
+                resultadoEnemigo.isJugadorGano()
+        );
     }
 
-    public CombatResult turnoEnemigo() {
-        if (turnoJugador) {
-            return new CombatResult("Todavía es turno de Gerolando.", false, false);
-        }
+    private CombatResult turnoEnemigo() {
+        int vidaAntes = jugador.getVidaActual();
 
         enemigo.atacar(jugador);
 
+        int danoReal = vidaAntes - jugador.getVidaActual();
+
+        StringBuilder mensaje = new StringBuilder();
+        mensaje.append(enemigo.nombre).append(" atacó.\n");
+        mensaje.append("Gerolando recibió ").append(danoReal).append(" de daño.");
+
         if (!jugador.estaVivo()) {
-            return new CombatResult("Has sido derrotado...", true, false);
+            mensaje.append("\nHas sido derrotado...");
+            return new CombatResult(mensaje.toString(), true, false);
         }
 
         turnoJugador = true;
-        return new CombatResult("", false, false);
+        return new CombatResult(mensaje.toString(), false, false);
     }
 
     public Gerolando getJugador() {

@@ -6,7 +6,7 @@ public class Biomes {
             "Playa",
             "Una costa tranquila con arena caliente y brisa marina.",
             new String[]{"finko"},
-            30
+            100
     );
 
     public static final Biome BOSQUE = new Biome(

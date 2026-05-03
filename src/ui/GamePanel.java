@@ -70,10 +70,11 @@ public class GamePanel extends JPanel {
 
     private int selectedCommand = 0;
     private int selectedItem = 0;
+    private int inventoryScrollOffset = 0;
 
     private String battleMessage = "Elige un comando.";
 
-    private BufferedImage grass;
+    private BufferedImage sand;
     private BufferedImage wall;
     private BufferedImage water;
     private BufferedImage player;
@@ -106,7 +107,7 @@ public class GamePanel extends JPanel {
     }
 
     private void cargarImagenes() {
-        grass = cargarImagenResource("/assets/tiles/grass.png");
+        sand = cargarImagenResource("/assets/tiles/sand.png");
         wall = cargarImagenResource("/assets/tiles/wall.png");
         water = cargarImagenResource("/assets/tiles/water.png");
         player = cargarImagenResource("/assets/sprites/player/gerolando.png");
@@ -194,8 +195,7 @@ public class GamePanel extends JPanel {
             selectedCommand--;
             if (selectedCommand < 0) selectedCommand = 2;
         } else if (battleMenuMode == BattleMenuMode.INVENTORY) {
-            selectedItem--;
-            if (selectedItem < 0) selectedItem = Math.max(0, engine.getJugador().inventario.size() - 1);
+            moverSeleccionInventario(-1);
         }
 
         repaint();
@@ -211,8 +211,35 @@ public class GamePanel extends JPanel {
             selectedCommand++;
             if (selectedCommand > 2) selectedCommand = 0;
         } else if (battleMenuMode == BattleMenuMode.INVENTORY) {
-            selectedItem++;
-            if (selectedItem >= engine.getJugador().inventario.size()) selectedItem = 0;
+            moverSeleccionInventario(1);
+        }
+
+        repaint();
+    }
+    private void moverSeleccionInventario(int direccion) {
+        int totalItems = engine.getJugador().inventario.size();
+
+        if (totalItems == 0) {
+            selectedItem = 0;
+            inventoryScrollOffset = 0;
+            repaint();
+            return;
+        }
+
+        selectedItem += direccion;
+
+        if (selectedItem < 0) {
+            selectedItem = totalItems - 1;
+        } else if (selectedItem >= totalItems) {
+            selectedItem = 0;
+        }
+
+        int maxVisible = 3;
+
+        if (selectedItem < inventoryScrollOffset) {
+            inventoryScrollOffset = selectedItem;
+        } else if (selectedItem >= inventoryScrollOffset + maxVisible) {
+            inventoryScrollOffset = selectedItem - maxVisible + 1;
         }
 
         repaint();
@@ -257,6 +284,7 @@ public class GamePanel extends JPanel {
             case 1:
                 battleMenuMode = BattleMenuMode.INVENTORY;
                 selectedItem = 0;
+                inventoryScrollOffset = 0;
                 battleMessage = "Selecciona un item.";
                 repaint();
                 break;
@@ -274,18 +302,11 @@ public class GamePanel extends JPanel {
 
         CombatResult result = combatSystem.atacar();
 
-        StringBuilder mensajes = new StringBuilder();
-        mensajes.append("Gerolando ataca.");
-
-        if (!result.getMensaje().isEmpty()) {
-            mensajes.append("\n").append(result.getMensaje());
-        }
-
         if (result.isCombateTerminado()) {
             marcarCombateTerminado(result.isJugadorGano());
         }
 
-        mostrarMensajesDeCombate(mensajes.toString());
+        mostrarMensajesDeCombate(result.getMensaje());
     }
 
     private void usarItemSeleccionado() {
@@ -298,18 +319,11 @@ public class GamePanel extends JPanel {
 
         CombatResult result = combatSystem.usarItem(selectedItem);
 
-        StringBuilder mensajes = new StringBuilder();
-        mensajes.append("Usaste un item.");
-
-        if (!result.getMensaje().isEmpty()) {
-            mensajes.append("\n").append(result.getMensaje());
-        }
-
         if (result.isCombateTerminado()) {
             marcarCombateTerminado(result.isJugadorGano());
         }
 
-        mostrarMensajesDeCombate(mensajes.toString());
+        mostrarMensajesDeCombate(result.getMensaje());
     }
 
     private void moverJugador(int colDelta, int rowDelta) {
@@ -348,7 +362,7 @@ public class GamePanel extends JPanel {
         enemySprite = cargarImagenDesdePath(enemigo.spritePath);
         battleBackground = cargarFondoCombate();
 
-        battleMessage = result.getMensaje() + "\n" + combatSystem.iniciarCombate();
+        mostrarMensajesDeCombate(combatSystem.iniciarCombate());
     }
 
     private BufferedImage cargarFondoCombate() {
@@ -432,6 +446,7 @@ public class GamePanel extends JPanel {
                     battleBackground,
                     selectedCommand,
                     selectedItem,
+                    inventoryScrollOffset,
                     battleMenuMode.name(),
                     battleMessage,
                     arrowVisible
@@ -483,7 +498,7 @@ public class GamePanel extends JPanel {
                 return water;
             case 0:
             default:
-                return grass;
+                return sand;
         }
     }
 
@@ -541,6 +556,7 @@ public class GamePanel extends JPanel {
         }
 
         if (!battleMessageQueue.estaVacia()) {
+            battleMenuMode = BattleMenuMode.MESSAGE;
             iniciarTextoTypewriter(battleMessageQueue.siguiente());
             return;
         }
@@ -550,10 +566,10 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        battleMessage = "Elige un comando.";
-        visibleBattleMessage = battleMessage;
-        fullBattleMessage = battleMessage;
         battleMenuMode = BattleMenuMode.COMMAND;
+        battleMessage = "";
+        visibleBattleMessage = "";
+        fullBattleMessage = "";
         messageFinished = true;
         arrowVisible = false;
 

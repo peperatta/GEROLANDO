@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BattleOverlayRenderer {
 
@@ -21,6 +23,7 @@ public class BattleOverlayRenderer {
                      BufferedImage battleBackground,
                      int selectedCommand,
                      int selectedItem,
+                     int inventoryScrollOffset,
                      String menuMode,
                      String message,
                      boolean showArrow){
@@ -29,7 +32,7 @@ public class BattleOverlayRenderer {
         drawStatsPanel(g2, combatSystem.getJugador());
         drawEnemy(g2, width, enemySprite, combatSystem);
         drawCommandPanel(g2, selectedCommand, menuMode);
-        drawBottomPanel(g2, width, height, combatSystem, selectedItem, menuMode, message, showArrow);
+        drawBottomPanel(g2, width, height, combatSystem, selectedItem, inventoryScrollOffset, menuMode, message, showArrow);
     }
 
     private void drawBattleWindow(Graphics2D g2, int width, int height, BufferedImage battleBackground) {
@@ -85,8 +88,8 @@ public class BattleOverlayRenderer {
         g2.setFont(new Font("Monospaced", Font.BOLD, 10));
         g2.setColor(Color.WHITE);
         g2.drawString(
-                combatSystem.getEnemigo().nombre + " HP: " + combatSystem.getEnemigo().vidaActual,
-                x - 16,
+                combatSystem.getEnemigo().nombre,
+                x,
                 y + enemySize + 14
         );
     }
@@ -119,6 +122,7 @@ public class BattleOverlayRenderer {
                                  int height,
                                  CombatSystem combatSystem,
                                  int selectedItem,
+                                 int inventoryScrollOffset,
                                  String menuMode,
                                  String message,
                                  boolean showArrow) {
@@ -133,7 +137,7 @@ public class BattleOverlayRenderer {
         g2.setColor(Color.WHITE);
 
         if (menuMode.equals("INVENTORY")) {
-            drawInventory(g2, combatSystem, selectedItem, x, y);
+            drawInventory(g2, combatSystem, selectedItem, inventoryScrollOffset, x, y);
             return;
         }
 
@@ -145,9 +149,7 @@ public class BattleOverlayRenderer {
             return;
         }
 
-        if (message == null || message.isEmpty()) {
-            g2.drawString("Elige un comando.", x + 12, y + 28);
-        } else {
+        if (message != null && !message.isEmpty()) {
             drawWrappedText(g2, message, x + 12, y + 22, w - 24);
 
             if (showArrow) {
@@ -156,29 +158,89 @@ public class BattleOverlayRenderer {
         }
     }
 
-    private void drawInventory(Graphics2D g2, CombatSystem combatSystem, int selectedItem, int x, int y) {
-        if (combatSystem.getJugador().inventario.size() == 0) {
+    private void drawInventory(Graphics2D g2,
+                               CombatSystem combatSystem,
+                               int selectedItem,
+                               int inventoryScrollOffset,
+                               int x,
+                               int y) {
+        List<Item> itemsOrdenados = obtenerItemsOrdenados(combatSystem);
+        int totalItems = itemsOrdenados.size();
+
+        if (totalItems == 0) {
             g2.drawString("Inventario vacío.", x + 12, y + 28);
             g2.drawString("ESC para volver", x + 12, y + 48);
             return;
         }
 
-        g2.drawString("Elige item. ESC para volver.", x + 12, y + 16);
+        g2.drawString("ITEMS", x + 12, y + 16);
 
-        int maxVisible = Math.min(3, combatSystem.getJugador().inventario.size());
+        int maxVisible = 3;
 
         for (int i = 0; i < maxVisible; i++) {
-            Item item = combatSystem.getJugador().inventario.getItems().get(i);
+            int itemIndex = inventoryScrollOffset + i;
+
+            if (itemIndex >= totalItems) break;
+
+            Item item = itemsOrdenados.get(itemIndex);
+
             int textY = y + 34 + (i * 15);
 
-            if (i == selectedItem) {
+            if (itemIndex == selectedItem) {
                 g2.drawString(">", x + 12, textY);
             }
 
-            g2.drawString(item.getNombre(), x + 28, textY);
+            String linea = construirLineaItem(combatSystem, item);
+            g2.drawString(linea, x + 28, textY);
+        }
+
+        if (inventoryScrollOffset > 0) {
+            g2.drawString("↑", x + 260, y + 16);
+        }
+
+        if (inventoryScrollOffset + maxVisible < totalItems) {
+            g2.drawString("↓", x + 260, y + 58);
         }
     }
+    private List<Item> obtenerItemsOrdenados(CombatSystem combatSystem) {
+        List<Item> originales = combatSystem.getJugador().inventario.getItems();
+        List<Item> equipados = new ArrayList<>();
+        List<Item> noEquipados = new ArrayList<>();
 
+        for (Item item : originales) {
+            if (combatSystem.getJugador().estaEquipado(item)) {
+                equipados.add(item);
+            } else {
+                noEquipados.add(item);
+            }
+        }
+
+        List<Item> resultado = new ArrayList<>();
+        resultado.addAll(equipados);
+        resultado.addAll(noEquipados);
+
+        return resultado;
+    }
+    private String construirLineaItem(CombatSystem combatSystem, Item item) {
+        String linea = item.getNombre();
+
+        // Marcar si está equipado
+        if (combatSystem.getJugador().estaEquipado(item)) {
+            linea += " [EQ]";
+        }
+
+        return limitarTexto(linea, 32);
+    }
+
+    private String limitarTexto(String texto, int maxLength) {
+        if (texto == null) return "";
+
+        if (texto.length() <= maxLength) {
+            return texto;
+        }
+
+        return texto.substring(0, maxLength - 3) + "...";
+    }
     private void drawPanel(Graphics2D g2, int x, int y, int w, int h) {
         g2.setColor(Color.BLACK);
         g2.fillRect(x, y, w, h);
