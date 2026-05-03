@@ -217,7 +217,7 @@ public class GamePanel extends JPanel {
         repaint();
     }
     private void moverSeleccionInventario(int direccion) {
-        int totalItems = engine.getJugador().inventario.size();
+        int totalItems = getItemsOrdenados().size();
 
         if (totalItems == 0) {
             selectedItem = 0;
@@ -312,12 +312,14 @@ public class GamePanel extends JPanel {
     private void usarItemSeleccionado() {
         if (combatSystem == null) return;
 
-        if (engine.getJugador().inventario.size() == 0) {
-            mostrarMensajesDeCombate("El inventario está vacío.");
+        int indiceReal = convertirIndiceVisualAReal(selectedItem);
+
+        if (indiceReal == -1) {
+            mostrarMensajesDeCombate("Error al seleccionar item.");
             return;
         }
 
-        CombatResult result = combatSystem.usarItem(selectedItem);
+        CombatResult result = combatSystem.usarItem(indiceReal);
 
         if (result.isCombateTerminado()) {
             marcarCombateTerminado(result.isJugadorGano());
@@ -665,5 +667,37 @@ public class GamePanel extends JPanel {
             arrowVisible = true;
             repaint();
         }
+    }
+    private java.util.List<Item> getItemsOrdenados() {
+        java.util.List<Item> originales = engine.getJugador().inventario.getItems();
+
+        java.util.List<Item> equipados = new java.util.ArrayList<>();
+        java.util.List<Item> noEquipados = new java.util.ArrayList<>();
+
+        for (Item item : originales) {
+            if (engine.getJugador().estaEquipado(item)) {
+                equipados.add(item);
+            } else {
+                noEquipados.add(item);
+            }
+        }
+
+        java.util.List<Item> resultado = new java.util.ArrayList<>();
+        resultado.addAll(equipados);
+        resultado.addAll(noEquipados);
+
+        return resultado;
+    }
+    private int convertirIndiceVisualAReal(int indiceVisual) {
+        java.util.List<Item> ordenados = getItemsOrdenados();
+        java.util.List<Item> originales = engine.getJugador().inventario.getItems();
+
+        if (indiceVisual < 0 || indiceVisual >= ordenados.size()) {
+            return -1;
+        }
+
+        Item seleccionado = ordenados.get(indiceVisual);
+
+        return originales.indexOf(seleccionado);
     }
 }

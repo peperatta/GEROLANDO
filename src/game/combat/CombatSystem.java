@@ -72,12 +72,13 @@ public class CombatSystem {
             return new CombatResult("Índice de item no válido.", false, false);
         }
 
-        String nombreItem = jugador.inventario.getItems().get(itemIndex).getNombre();
+        var item = jugador.inventario.getItems().get(itemIndex);
+        String nombreItem = item.getNombre();
 
-        jugador.usarItem(jugador.inventario.getItems().get(itemIndex));
+        jugador.usarItem(item);
 
         StringBuilder mensaje = new StringBuilder();
-        mensaje.append("Gerolando usó ").append(nombreItem).append(".");
+        mensaje.append("Gerolando ").append(obtenerVerboItem(item)).append(" ").append(nombreItem).append(".");
 
         turnoJugador = false;
 
@@ -90,7 +91,19 @@ public class CombatSystem {
                 resultadoEnemigo.isJugadorGano()
         );
     }
+    private String obtenerVerboItem(items.Item item) {
+        switch (item.getTipo()) {
+            case CONSUMIBLE:
+                return "tomó";
 
+            case ARMA:
+            case ARMADURA:
+                return "equipó";
+
+            default:
+                return "usó";
+        }
+    }
     private CombatResult turnoEnemigo() {
         int vidaAntes = jugador.getVidaActual();
 
