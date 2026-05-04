@@ -1,4 +1,4 @@
-package game;
+package ui;
 
 import characters.Gerolando;
 import data.factory.ArmaFactory;
@@ -13,21 +13,43 @@ import data.model.DatosArma;
 import data.model.DatosArmadura;
 import data.model.DatosEnemigo;
 import data.model.DatosPocion;
+import game.GameEngine;
 import items.Arma;
 import items.Armadura;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import java.util.Map;
 
-public class Main {
+public class GameFrame extends JFrame {
 
-    public static void main(String[] args) {
+    public GameFrame() {
+        setTitle("Gerolando");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
 
+        GameEngine engine = crearGameEngineVisual();
+
+        GamePanel panel = new GamePanel(engine);
+        add(panel);
+
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        panel.requestFocusInWindow();
+    }
+
+    private GameEngine crearGameEngineVisual() {
         Map<String, DatosArma> catalogoArma =
                 ArmaLoader.cargar("src/assets/data/armas.json");
+
         Map<String, DatosArmadura> catalogoArmadura =
                 ArmaduraLoader.cargar("src/assets/data/armaduras.json");
+
         Map<String, DatosEnemigo> catalogoEnemigo =
                 EnemigoLoader.cargar("src/assets/data/enemigos.json");
+
         Map<String, DatosPocion> catalogoPocion =
                 PotionLoader.cargar("src/assets/data/pociones.json");
 
@@ -36,20 +58,18 @@ public class Main {
         EnemigoFactory enemigoFactory = new EnemigoFactory(catalogoEnemigo);
         PotionFactory potionFactory = new PotionFactory(catalogoPocion);
 
+        Gerolando gerolando = new Gerolando();
 
-        Arma paloMadera = armaFactory.crear("palo_madera");
         Arma espadaHierro = armaFactory.crear("espada_hierro");
         Arma espadaMadera = armaFactory.crear("espada_madera");
         Armadura ropaVieja = armaduraFactory.crear("ropa_vieja");
-
-        Gerolando gerolando = new Gerolando();
 
         gerolando.inventario.agregar(espadaHierro);
         gerolando.inventario.agregar(espadaMadera);
         gerolando.inventario.agregar(ropaVieja);
 
-        gerolando.equiparArmadura(ropaVieja);
         gerolando.equiparArma(espadaHierro);
+        gerolando.equiparArmadura(ropaVieja);
 
         GameEngine engine = new GameEngine(
                 gerolando,
@@ -59,7 +79,12 @@ public class Main {
                 armaduraFactory
         );
 
-        ConsoleGameRunner runner = new ConsoleGameRunner(engine);
-        runner.start();
+        engine.iniciarPartida();
+
+        return engine;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(GameFrame::new);
     }
 }

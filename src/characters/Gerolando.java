@@ -21,7 +21,7 @@ public class Gerolando {
         this.oro = 100;
         this.progressionSystem = new ProgressionSystem();
         this.equipmentSystem = new EquipmentSystem();
-        this.combatStats = new CombatStats(100, 5, 20, 3);
+        this.combatStats = new CombatStats(50, 5, 20, 3);
     }
 
     // =========================

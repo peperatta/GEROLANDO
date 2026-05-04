@@ -9,7 +9,7 @@
     "velocidad": 6,
     "debilidad": "magica",
     "drops": ["pocion_vida_pequena", "palo_madera"],
-    "dropChance": 25
+    "dropChance": 10
   },
   {
     "id": "calabazo",
@@ -21,7 +21,7 @@
     "velocidad": 6,
     "debilidad": "rango",
     "drops": ["pocion_vida_pequena", "espada_madera"],
-    "dropChance": 25
+    "dropChance": 20
   },
   {
     "id": "diablo",
@@ -33,7 +33,7 @@
     "velocidad": 6,
     "debilidad": "magica",
     "drops": ["pocion_vida_pequena", "espada_madera"],
-    "dropChance": 35
+    "dropChance": 30
   }
 ]
 

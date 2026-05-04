@@ -10,15 +10,15 @@ import game.shop.Shop;
 import game.world.Biome;
 import game.world.Biomes;
 import items.Item;
+import game.loot.LootSystem;
 
 import java.util.Random;
-import java.util.Scanner;
 
 public class GameEngine {
     private GameState currentState;
+    private LootSystem lootSystem;
     private Gerolando jugador;
     private EnemigoFactory enemigoFactory;
-    private Scanner scanner;
     private Random random;
     private boolean running;
     private Biome biomeActual;
@@ -31,122 +31,78 @@ public class GameEngine {
                       ArmaduraFactory armaduraFactory) {
         this.jugador = jugador;
         this.enemigoFactory = enemigoFactory;
-        this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.running = true;
         this.currentState = GameState.MENU;
         this.biomeActual = Biomes.PLAYA;
         this.shop = new Shop(potionFactory, armaFactory, armaduraFactory);
+        this.lootSystem = new LootSystem(potionFactory, armaFactory, armaduraFactory);
     }
 
-    public void start() {
-        System.out.println("=== BIENVENIDO A GEROLANDO ===");
-
-        while (running) {
-            switch (currentState) {
-                case MENU:
-                    handleMenu();
-                    break;
-                case EXPLORATION:
-                    handleExploration();
-                    break;
-                case COMBAT:
-                    currentState = GameState.EXPLORATION;
-                    break;
-                case GAME_OVER:
-                    handleGameOver();
-                    break;
-            }
-        }
+    public String iniciarPartida() {
+        currentState = GameState.EXPLORATION;
+        return "Comienza la aventura de Gerolando...\nZona inicial: "
+                + biomeActual.getNombre() + "\n" + biomeActual.getDescripcion();
     }
 
-    private void handleMenu() {
-        System.out.println("\n1. Iniciar partida");
-        System.out.println("2. Salir");
-        System.out.print("Elige una opción: ");
-
-        int opcion = scanner.nextInt();
-
-        switch (opcion) {
-            case 1:
-                currentState = GameState.EXPLORATION;
-                System.out.println("\nComienza la aventura de Gerolando...");
-                System.out.println("Zona inicial: " + biomeActual.getNombre());
-                System.out.println(biomeActual.getDescripcion());
-                break;
-            case 2:
-                running = false;
-                System.out.println("Saliendo del juego...");
-                break;
-            default:
-                System.out.println("Opción no válida.");
-        }
-    }
-
-    private void handleExploration() {
-        System.out.println("\n=== EXPLORACIÓN ===");
-        System.out.println("Zona actual: " + biomeActual.getNombre());
-        System.out.println(biomeActual.getDescripcion());
-        System.out.println("1. Avanzar");
-        System.out.println("2. Ver estado");
-        System.out.println("3. Ver inventario");
-        System.out.println("4. Ir a la tienda");
-        System.out.println("5. Cambiar de zona");
-        System.out.println("6. Salir");
-        System.out.print("Elige una opción: ");
-
-        int opcion = scanner.nextInt();
-
-        switch (opcion) {
-            case 1:
-                avanzar();
-                break;
-            case 2:
-                jugador.imprimirEstado();
-                break;
-            case 3:
-                manejarInventario();
-                break;
-            case 4:
-                shop.abrirTienda(jugador);
-                break;
-            case 5:
-                cambiarZona();
-                break;
-            case 6:
-                running = false;
-                System.out.println("Saliendo del juego...");
-                break;
-            default:
-                System.out.println("Opción no válida.");
-        }
-    }
-
-    private void avanzar() {
-        System.out.println("\nGerolando avanza por " + biomeActual.getNombre() + "...");
+    public ExplorationResult avanzar() {
+        String mensajeBase = "Gerolando avanza por " + biomeActual.getNombre() + "...";
 
         boolean hayEncuentro = random.nextInt(100) < biomeActual.getProbabilidadEncuentro();
 
-        if (hayEncuentro) {
-            Enemigo enemigo = generarEnemigoAleatorio();
+        if (!hayEncuentro) {
+            return ExplorationResult.sinEncuentro(
+                    mensajeBase + "\nNo pasó nada. El camino sigue tranquilo."
+            );
+        }
 
-            if (enemigo == null) {
-                System.out.println("Ocurrió un problema al generar el enemigo.");
-                return;
-            }
+        Enemigo enemigo = generarEnemigoAleatorio();
 
-            System.out.println("¡Un " + enemigo.nombre + " apareció!");
+        if (enemigo == null) {
+            return ExplorationResult.sinEncuentro(
+                    mensajeBase + "\nOcurrió un problema al generar el enemigo."
+            );
+        }
 
-            currentState = GameState.COMBAT;
-            Combate.iniciarCombate(jugador, enemigo);
+        currentState = GameState.COMBAT;
 
-            if (jugador.estaVivo()) {
-                currentState = GameState.EXPLORATION;
-            } else {
-                currentState = GameState.GAME_OVER;
-            }
+        return ExplorationResult.conEncuentro(
+                mensajeBase + "\n¡Un " + enemigo.nombre + " apareció!",
+                enemigo
+        );
+    }
+
+    public String usarItemInventario(int itemIndex) {
+        if (jugador.inventario.size() == 0) {
+            return "El inventario está vacío.";
+        }
+
+        if (itemIndex < 0 || itemIndex >= jugador.inventario.size()) {
+            return "Índice de item no válido.";
+        }
+
+        Item item = jugador.inventario.getItems().get(itemIndex);
+        jugador.usarItem(item);
+
+        return "Seleccionaste: " + item.getNombre();
+    }
+
+    public String cambiarZona(Biome nuevoBiome) {
+        if (nuevoBiome == null) {
+            return "Zona no válida.";
+        }
+
+        this.biomeActual = nuevoBiome;
+
+        return "Ahora estás en: " + biomeActual.getNombre()
+                + "\n" + biomeActual.getDescripcion();
+    }
+
+    public void finalizarCombate(boolean jugadorVivo) {
+        if (jugadorVivo) {
+            currentState = GameState.EXPLORATION;
         } else {
-            System.out.println("No pasó nada. El camino sigue tranquilo.");
+            currentState = GameState.GAME_OVER;
         }
     }
 
@@ -161,79 +117,49 @@ public class GameEngine {
         return enemigoFactory.crear(idElegido);
     }
 
-    private void manejarInventario() {
-        if (jugador.inventario.size() == 0) {
-            System.out.println("El inventario está vacío.");
-            return;
-        }
-
-        System.out.println("\n=== INVENTARIO ===");
-        jugador.inventario.mostrarInventario(jugador);
-        System.out.println("0. Cancelar");
-        System.out.print("Selecciona un item por número para usar/equipar: ");
-
-        int opcion = scanner.nextInt();
-
-        if (opcion == 0) {
-            System.out.println("Regresando...");
-            return;
-        }
-
-        int itemIndex = opcion - 1;
-
-        if (itemIndex >= 0 && itemIndex < jugador.inventario.size()) {
-            Item item = jugador.inventario.getItems().get(itemIndex);
-            jugador.usarItem(item);
-        } else {
-            System.out.println("Índice de item no válido.");
-        }
+    public void detener() {
+        running = false;
     }
 
-    private void cambiarZona() {
-        System.out.println("\n=== CAMBIAR DE ZONA ===");
-        System.out.println("1. Playa");
-        System.out.println("2. Bosque");
-        System.out.println("3. Cueva");
-        System.out.println("0. Cancelar");
-        System.out.print("Elige una zona: ");
+    public boolean isRunning() {
+        return running;
+    }
 
-        int opcion = scanner.nextInt();
+    public GameState getCurrentState() {
+        return currentState;
+    }
 
-        switch (opcion) {
-            case 1:
-                biomeActual = Biomes.PLAYA;
+    public Gerolando getJugador() {
+        return jugador;
+    }
+
+    public Biome getBiomeActual() {
+        return biomeActual;
+    }
+
+    public Shop getShop() {
+        return shop;
+    }
+
+    public LootSystem getLootSystem() {
+        return lootSystem;
+    }
+    public void actualizarBiomePorTile(int tileId) {
+        switch (tileId) {
+            case 0,1,2,3,4,5,6,7,8,9:
+                this.biomeActual = Biomes.PLAYA;
                 break;
-            case 2:
-                biomeActual = Biomes.BOSQUE;
+
+            case 10,11,12,13,14,15,16,17,18,19:
+                this.biomeActual = Biomes.BOSQUE;
                 break;
-            case 3:
-                biomeActual = Biomes.CUEVA;
+
+            case 20,21,22,23,24,25,26,27,28,29:
+                this.biomeActual = Biomes.CUEVA;
                 break;
-            case 0:
-                System.out.println("Cambio de zona cancelado.");
-                return;
+
             default:
-                System.out.println("Opción no válida.");
-                return;
-        }
-
-        System.out.println("Ahora estás en: " + biomeActual.getNombre());
-        System.out.println(biomeActual.getDescripcion());
-    }
-
-    private void handleGameOver() {
-        System.out.println("\n=== GAME OVER ===");
-        System.out.println("Gerolando ha caído en combate.");
-        System.out.println("1. Salir");
-        System.out.print("Elige una opción: ");
-
-        int opcion = scanner.nextInt();
-
-        if (opcion == 1) {
-            running = false;
-            System.out.println("Fin del juego.");
-        } else {
-            System.out.println("Opción no válida.");
+                break;
         }
     }
 }
