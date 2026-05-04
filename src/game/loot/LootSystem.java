@@ -29,10 +29,21 @@ public class LootSystem {
         int xpGanada = enemigo.getVida() / 5;
         int oroGanado = enemigo.getVida() / 3;
 
+        int nivelAntes = jugador.getNivel();
+
         jugador.ganarXP(xpGanada);
         jugador.ganarOro(oroGanado);
 
+        int nivelDespues = jugador.getNivel();
+
         StringBuilder mensaje = new StringBuilder();
+
+        mensaje.append("Ganaste ").append(xpGanada).append(" XP.");
+        mensaje.append("\nGanaste ").append(oroGanado).append(" de oro.");
+
+        if (nivelDespues > nivelAntes) {
+            mensaje.append("\n¡Gerolando subió al nivel ").append(nivelDespues).append("!");
+        }
         Item drop = calcularDrop(enemigo);
 
         if (drop == null) {
