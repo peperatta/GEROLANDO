@@ -21,6 +21,7 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -43,30 +44,34 @@ public class GamePanel extends JPanel {
     private int manaVisualJugador;
     private BufferedImage dropSprite;
     private boolean mostrandoDrop = false;
-
     private static final int INTERNAL_WIDTH = TILE_SIZE * SCREEN_COLS;
     private static final int INTERNAL_HEIGHT = TILE_SIZE * SCREEN_ROWS;
-
     private static final int SCALE = 2;
-
     private static final int WIDTH = INTERNAL_WIDTH * SCALE;
     private static final int HEIGHT = INTERNAL_HEIGHT * SCALE;
-
     private static final long MOVE_COOLDOWN_MS = 170;
+    private static final String[] PAUSE_COMMANDS = {"ESTADO", "ITEMS", "HECHIZOS"};
+    private static final int PAUSE_ITEMS_VISIBLE = 6;
 
     // =========================
     // ESTADOS VISUALES
     // =========================
     private enum GameViewState {
         EXPLORATION,
-        COMBAT
+        COMBAT,
+        PAUSE
     }
-
     private enum BattleMenuMode {
         COMMAND,
         INVENTORY,
         STATUS,
         MESSAGE
+    }
+    private enum PauseMenuMode {
+        COMMAND,
+        STATUS,
+        ITEMS,
+        SPELLS
     }
 
     // =========================
@@ -83,6 +88,7 @@ public class GamePanel extends JPanel {
     // =========================
     private GameViewState currentView = GameViewState.EXPLORATION;
     private BattleMenuMode battleMenuMode = BattleMenuMode.COMMAND;
+    private PauseMenuMode pauseMenuMode = PauseMenuMode.COMMAND;
 
     // =========================
     // MAPA Y POSICIÓN
@@ -103,6 +109,14 @@ public class GamePanel extends JPanel {
     private int selectedCommand = 0;
     private int selectedItem = 0;
     private int inventoryScrollOffset = 0;
+
+    // =========================
+    // MENU DE PAUSA
+    // =========================
+    private int selectedPauseCommand = 0;
+    private int selectedPauseItem = 0;
+    private int pauseInventoryScrollOffset = 0;
+    private String pauseMessage = "";
 
     // =========================
     // MENSAJES DE COMBATE
@@ -191,7 +205,6 @@ public class GamePanel extends JPanel {
     private void cargarMapa() {
         mapa = MapLoader.cargar("/assets/maps/overworld.txt");
     }
-
     private void cargarImagenes() {
         sand = cargarImagenResource("/assets/tiles/sand.png");
         sand2 = cargarImagenResource("/assets/tiles/sand_stone.png");
@@ -205,7 +218,6 @@ public class GamePanel extends JPanel {
 
         player = cargarImagenResource("/assets/sprites/player/gerolando.png");
     }
-
     private BufferedImage cargarImagenResource(String ruta) {
         try {
             return ImageIO.read(getClass().getResourceAsStream(ruta));
@@ -214,7 +226,6 @@ public class GamePanel extends JPanel {
             return null;
         }
     }
-
     private BufferedImage cargarImagenDesdePath(String ruta) {
         try {
             return ImageIO.read(new File(ruta));
@@ -223,7 +234,6 @@ public class GamePanel extends JPanel {
             return null;
         }
     }
-
     private BufferedImage cargarFondoCombate() {
         String biomeId = engine.getBiomeActual().getId();
 
@@ -254,6 +264,7 @@ public class GamePanel extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "left");
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "right");
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "space");
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "enter");
         inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
 
         actionMap.put("up", new AbstractAction() {
@@ -295,6 +306,13 @@ public class GamePanel extends JPanel {
             }
         });
 
+        actionMap.put("enter", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                manejarEnter();
+            }
+        });
+
         actionMap.put("escape", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -302,8 +320,20 @@ public class GamePanel extends JPanel {
             }
         });
     }
+    private void manejarEnter() {
+        if (currentView == GameViewState.EXPLORATION) {
+            abrirPausa();
+            return;
+        }
 
+        confirmarAccion();
+    }
     private void manejarArriba() {
+        if (currentView == GameViewState.PAUSE) {
+            manejarArribaPausa();
+            return;
+        }
+
         if (currentView == GameViewState.EXPLORATION) {
             moverJugador(0, -1);
             return;
@@ -321,8 +351,12 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void manejarAbajo() {
+        if (currentView == GameViewState.PAUSE) {
+            manejarAbajoPausa();
+            return;
+        }
+
         if (currentView == GameViewState.EXPLORATION) {
             moverJugador(0, 1);
             return;
@@ -340,8 +374,12 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void confirmarAccion() {
+        if (currentView == GameViewState.PAUSE) {
+            confirmarAccionPausa();
+            return;
+        }
+
         if (currentView != GameViewState.COMBAT) return;
 
         if (battleMenuMode == BattleMenuMode.MESSAGE) {
@@ -358,8 +396,12 @@ public class GamePanel extends JPanel {
             usarItemSeleccionado();
         }
     }
-
     private void cancelarAccion() {
+        if (currentView == GameViewState.PAUSE) {
+            cancelarPausa();
+            return;
+        }
+
         if (currentView != GameViewState.COMBAT) return;
 
         if (battleMenuMode == BattleMenuMode.MESSAGE) {
@@ -368,6 +410,153 @@ public class GamePanel extends JPanel {
 
         battleMenuMode = BattleMenuMode.COMMAND;
         battleMessage = "Elige un comando.";
+
+        repaint();
+    }
+
+    // =========================
+    // PAUSA
+    // =========================
+    private void abrirPausa() {
+        currentView = GameViewState.PAUSE;
+        pauseMenuMode = PauseMenuMode.COMMAND;
+        selectedPauseCommand = 0;
+        selectedPauseItem = 0;
+        pauseInventoryScrollOffset = 0;
+        pauseMessage = "";
+
+        repaint();
+    }
+    private void cerrarPausa() {
+        currentView = GameViewState.EXPLORATION;
+        pauseMenuMode = PauseMenuMode.COMMAND;
+        pauseMessage = "";
+
+        repaint();
+    }
+    private void manejarArribaPausa() {
+        if (pauseMenuMode == PauseMenuMode.COMMAND) {
+            selectedPauseCommand--;
+
+            if (selectedPauseCommand < 0) {
+                selectedPauseCommand = 2;
+            }
+        } else if (pauseMenuMode == PauseMenuMode.ITEMS) {
+            moverSeleccionItemsPausa(-1);
+        }
+
+        repaint();
+    }
+    private void manejarAbajoPausa() {
+        if (pauseMenuMode == PauseMenuMode.COMMAND) {
+            selectedPauseCommand++;
+
+            if (selectedPauseCommand > 2) {
+                selectedPauseCommand = 0;
+            }
+        } else if (pauseMenuMode == PauseMenuMode.ITEMS) {
+            moverSeleccionItemsPausa(1);
+        }
+
+        repaint();
+    }
+    private void confirmarAccionPausa() {
+        if (pauseMenuMode == PauseMenuMode.COMMAND) {
+            confirmarComandoPausa();
+            return;
+        }
+
+        if (pauseMenuMode == PauseMenuMode.ITEMS) {
+            usarItemPausa();
+        }
+    }
+    private void confirmarComandoPausa() {
+        switch (selectedPauseCommand) {
+            case 0:
+                pauseMenuMode = PauseMenuMode.STATUS;
+                pauseMessage = "";
+                break;
+
+            case 1:
+                pauseMenuMode = PauseMenuMode.ITEMS;
+                selectedPauseItem = 0;
+                pauseInventoryScrollOffset = 0;
+                pauseMessage = "";
+                break;
+
+            case 2:
+                pauseMenuMode = PauseMenuMode.SPELLS;
+                pauseMessage = "Aun no hay hechizos.";
+                break;
+        }
+
+        repaint();
+    }
+    private void cancelarPausa() {
+        if (pauseMenuMode == PauseMenuMode.COMMAND) {
+            cerrarPausa();
+            return;
+        }
+
+        pauseMenuMode = PauseMenuMode.COMMAND;
+        pauseMessage = "";
+
+        repaint();
+    }
+    private void moverSeleccionItemsPausa(int direccion) {
+        int totalItems = getItemsOrdenados().size();
+
+        if (totalItems == 0) {
+            selectedPauseItem = 0;
+            pauseInventoryScrollOffset = 0;
+            return;
+        }
+
+        selectedPauseItem += direccion;
+
+        if (selectedPauseItem < 0) {
+            selectedPauseItem = totalItems - 1;
+        } else if (selectedPauseItem >= totalItems) {
+            selectedPauseItem = 0;
+        }
+
+        int maxVisible = PAUSE_ITEMS_VISIBLE;
+
+        if (selectedPauseItem < pauseInventoryScrollOffset) {
+            pauseInventoryScrollOffset = selectedPauseItem;
+        } else if (selectedPauseItem >= pauseInventoryScrollOffset + maxVisible) {
+            pauseInventoryScrollOffset = selectedPauseItem - maxVisible + 1;
+        }
+    }
+    private void usarItemPausa() {
+        int indiceReal = convertirIndiceVisualAReal(selectedPauseItem);
+
+        if (indiceReal == -1) {
+            pauseMessage = "No hay item seleccionado.";
+            repaint();
+            return;
+        }
+
+        Item item = engine.getJugador().inventario.getItems().get(indiceReal);
+        engine.getJugador().usarItem(item);
+
+        if (item instanceof Consumible) {
+            vidaVisualJugador = engine.getJugador().getVidaActual();
+            manaVisualJugador = engine.getJugador().getManaActual();
+            pauseMessage = "Usaste " + item.getNombre() + ".";
+        } else if (item instanceof Arma || item instanceof Armadura) {
+            pauseMessage = "Equipaste " + item.getNombre() + ".";
+        } else {
+            pauseMessage = "Usaste " + item.getNombre() + ".";
+        }
+
+        int totalItems = getItemsOrdenados().size();
+        if (selectedPauseItem >= totalItems) {
+            selectedPauseItem = Math.max(0, totalItems - 1);
+        }
+        if (pauseInventoryScrollOffset > selectedPauseItem) {
+            pauseInventoryScrollOffset = selectedPauseItem;
+        }
 
         repaint();
     }
@@ -409,7 +598,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void actualizarPantallaActual() {
         screenCol = playerCol / SCREEN_COLS;
         screenRow = playerRow / SCREEN_ROWS;
@@ -436,7 +624,6 @@ public class GamePanel extends JPanel {
 
         mostrarMensajesDeCombate(combatSystem.iniciarCombate());
     }
-
     private void confirmarComando() {
         switch (selectedCommand) {
             case 0:
@@ -454,7 +641,6 @@ public class GamePanel extends JPanel {
                 break;
         }
     }
-
     private void abrirInventarioCombate() {
         battleMenuMode = BattleMenuMode.INVENTORY;
         selectedItem = 0;
@@ -463,7 +649,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void atacar() {
         if (combatSystem == null) return;
 
@@ -477,7 +662,6 @@ public class GamePanel extends JPanel {
 
         mostrarMensajesDeCombate(result.getMensaje());
     }
-
     private void usarItemSeleccionado() {
         if (combatSystem == null) return;
 
@@ -498,12 +682,10 @@ public class GamePanel extends JPanel {
 
         mostrarMensajesDeCombate(result.getMensaje());
     }
-
     private void marcarCombateTerminado(boolean jugadorGano) {
         combateTerminadoPendiente = true;
         jugadorGanoPendiente = jugadorGano;
     }
-
     private void finalizarCombatePendiente() {
         if (jugadorGanoPendiente) {
             LootResult lootResult = engine.getLootSystem()
@@ -569,7 +751,6 @@ public class GamePanel extends JPanel {
         repaint();
     }
 
-
     // =========================
     // INVENTARIO VISUAL
     // =========================
@@ -601,7 +782,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private List<Item> getItemsOrdenados() {
         List<Item> originales = engine.getJugador().inventario.getItems();
 
@@ -622,7 +802,6 @@ public class GamePanel extends JPanel {
 
         return resultado;
     }
-
     private int convertirIndiceVisualAReal(int indiceVisual) {
         List<Item> ordenados = getItemsOrdenados();
         List<Item> originales = engine.getJugador().inventario.getItems();
@@ -651,7 +830,6 @@ public class GamePanel extends JPanel {
 
         arrowBlinkTimer.start();
     }
-
     private void mostrarMensajesDeCombate(String texto) {
         battleMessageQueue.limpiar();
         battleMessageQueue.agregarLineas(texto);
@@ -666,7 +844,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void avanzarMensajeCombate() {
         if (!messageFinished) {
             completarMensajeActual();
@@ -708,7 +885,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void iniciarTextoTypewriter(String mensaje) {
         fullBattleMessage = mensaje == null ? "" : mensaje;
         visibleBattleMessage = "";
@@ -732,7 +908,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void avanzarLetraMensaje() {
         if (messageCharIndex < fullBattleMessage.length()) {
             visibleBattleMessage += fullBattleMessage.charAt(messageCharIndex);
@@ -751,7 +926,6 @@ public class GamePanel extends JPanel {
 
         repaint();
     }
-
     private void completarMensajeActual() {
         if (messageFinished) return;
 
@@ -784,7 +958,6 @@ public class GamePanel extends JPanel {
             repaint();
         });
     }
-
     private void iniciarEnemyShake() {
         enemyShakeTicks = 8;
         enemyShakeOffsetX = 3;
@@ -795,7 +968,6 @@ public class GamePanel extends JPanel {
 
         enemyShakeTimer.start();
     }
-
     private void configurarScreenShake() {
         screenShakeTimer = new Timer(30, e -> {
             if (screenShakeTicks <= 0) {
@@ -814,7 +986,6 @@ public class GamePanel extends JPanel {
             repaint();
         });
     }
-
     private void iniciarScreenShake() {
         screenShakeTicks = 10;
 
@@ -851,7 +1022,11 @@ public class GamePanel extends JPanel {
             dibujarCombate(bufferGraphics);
         }
 
-        dibujarDebug(bufferGraphics);
+        if (currentView == GameViewState.PAUSE) {
+            dibujarMenuPausa(bufferGraphics);
+        } else {
+            dibujarDebug(bufferGraphics);
+        }
 
         bufferGraphics.dispose();
 
@@ -864,7 +1039,6 @@ public class GamePanel extends JPanel {
 
         g2.drawImage(screenBuffer, 0, 0, WIDTH, HEIGHT, null);
     }
-
     private void dibujarCombate(Graphics2D g2) {
         battleRenderer.draw(
                 g2,
@@ -885,6 +1059,145 @@ public class GamePanel extends JPanel {
                 dropSprite,
                 mostrandoDrop
         );
+    }
+    private void dibujarMenuPausa(Graphics2D g2) {
+        int commandX = 8;
+        int commandY = 8;
+        int commandW = 112;
+        int commandH = 82;
+
+        dibujarPanelPausa(g2, commandX, commandY, commandW, commandH);
+
+        g2.setFont(new Font("Monospaced", Font.BOLD, 11));
+        g2.setColor(Color.WHITE);
+        g2.drawString("-COMMAND-", commandX + 26, commandY + 11);
+
+        dibujarComandosPausa(g2, commandX + 10, commandY + 30);
+
+        if (pauseMenuMode != PauseMenuMode.COMMAND) {
+            int contentX = 18;
+            int contentY = 96;
+            int contentW = 284;
+            int contentH = 128;
+
+            dibujarPanelPausa(g2, contentX, contentY, contentW, contentH);
+            dibujarContenidoPausa(g2, contentX + 14, contentY + 22, contentW - 28, contentH - 32);
+        }
+    }
+    private void dibujarComandosPausa(Graphics2D g2, int x, int y) {
+        for (int i = 0; i < PAUSE_COMMANDS.length; i++) {
+            int textY = y + (i * 18);
+
+            if (pauseMenuMode == PauseMenuMode.COMMAND && selectedPauseCommand == i) {
+                g2.drawString(">", x, textY);
+            }
+
+            g2.drawString(PAUSE_COMMANDS[i], x + 14, textY);
+        }
+    }
+    private void dibujarContenidoPausa(Graphics2D g2, int x, int y, int w, int h) {
+        switch (pauseMenuMode) {
+            case STATUS:
+                dibujarEstadoPausa(g2, x, y);
+                break;
+
+            case ITEMS:
+                dibujarItemsPausa(g2, x, y);
+                break;
+
+            case SPELLS:
+                dibujarHechizosPausa(g2, x, y);
+                break;
+
+            case COMMAND:
+            default:
+                g2.drawString("Elige una", x, y);
+                g2.drawString("opcion.", x, y + 16);
+                break;
+        }
+    }
+    private void dibujarEstadoPausa(Graphics2D g2, int x, int y) {
+        var jugador = engine.getJugador();
+
+        g2.drawString("-STATUS-", x + 92, y - 10);
+        g2.drawString("LV " + jugador.getNivel(), x, y + 8);
+        g2.drawString("XP " + jugador.getXP(), x + 126, y + 8);
+        g2.drawString("HP " + jugador.getVidaActual() + "/" + jugador.getVidaMax(), x, y + 27);
+        g2.drawString("MP " + jugador.getManaActual() + "/" + jugador.getManaMax(), x + 126, y + 27);
+        g2.drawString("ATK " + jugador.getAtaque(), x, y + 46);
+        g2.drawString("DEF " + jugador.getDefensa(), x + 126, y + 46);
+        g2.drawString("VEL " + jugador.getVelocidad(), x, y + 65);
+        g2.drawString("GOLD " + jugador.getOro(), x + 126, y + 65);
+
+    }
+    private void dibujarItemsPausa(Graphics2D g2, int x, int y) {
+        List<Item> itemsOrdenados = getItemsOrdenados();
+
+        g2.drawString("-ITEM-", x + 104, y - 10);
+
+        if (itemsOrdenados.isEmpty()) {
+            g2.drawString("Inventario vacio.", x, y + 18);
+            return;
+        }
+
+        int maxVisible = PAUSE_ITEMS_VISIBLE;
+
+        for (int i = 0; i < maxVisible; i++) {
+            int itemIndex = pauseInventoryScrollOffset + i;
+
+            if (itemIndex >= itemsOrdenados.size()) break;
+
+            Item item = itemsOrdenados.get(itemIndex);
+            int textY = y + 8 + (i * 15);
+
+            if (itemIndex == selectedPauseItem) {
+                g2.drawString(">", x, textY);
+            }
+
+            g2.drawString(construirLineaItemPausa(item), x + 12, textY);
+        }
+
+        if (!pauseMessage.isEmpty()) {
+            g2.drawString(limitarTextoPausa(pauseMessage, 34), x, y + 98);
+        }
+    }
+    private void dibujarHechizosPausa(Graphics2D g2, int x, int y) {
+        g2.drawString("-SPELL-", x + 100, y - 10);
+        g2.drawString("Aun no hay hechizos.", x, y + 22);
+    }
+    private String construirLineaItemPausa(Item item) {
+        String linea = item.getNombre();
+
+        if (engine.getJugador().estaEquipado(item)) {
+            linea += " [EQ]";
+        }
+
+        if (item instanceof Arma) {
+            linea += " +" + ((Arma) item).getAtaque();
+        } else if (item instanceof Armadura) {
+            linea += " +" + ((Armadura) item).getDefensa();
+        } else if (item instanceof Pocion) {
+            linea += " +" + ((Pocion) item).getValor();
+        }
+
+        return limitarTextoPausa(linea, 36);
+    }
+    private String limitarTextoPausa(String texto, int maxLength) {
+        if (texto == null) return "";
+
+        if (texto.length() <= maxLength) {
+            return texto;
+        }
+
+        return texto.substring(0, maxLength - 3) + "...";
+    }
+    private void dibujarPanelPausa(Graphics2D g2, int x, int y, int w, int h) {
+        g2.setColor(Color.BLACK);
+        g2.fillRect(x, y, w, h);
+
+        g2.setColor(Color.WHITE);
+        g2.drawRect(x, y, w, h);
+        g2.drawRect(x + 2, y + 2, w - 4, h - 4);
     }
     private String obtenerSpritePathItem(Item item) {
         if (item instanceof Arma) {
@@ -920,7 +1233,6 @@ public class GamePanel extends JPanel {
             }
         }
     }
-
     private void dibujarTile(Graphics2D g2, int tileId, int screenCol, int screenRow) {
         BufferedImage img = obtenerImagenTile(tileId);
 
@@ -935,7 +1247,6 @@ public class GamePanel extends JPanel {
         g2.setColor(obtenerColorFallback(tileId));
         g2.fillRect(x, y, TILE_SIZE, TILE_SIZE);
     }
-
     private void dibujarJugador(Graphics2D g2) {
         int localCol = playerCol - (screenCol * SCREEN_COLS);
         int localRow = playerRow - (screenRow * SCREEN_ROWS);
@@ -950,7 +1261,6 @@ public class GamePanel extends JPanel {
             g2.fillRect(x, y, TILE_SIZE, TILE_SIZE);
         }
     }
-
     private void dibujarDebug(Graphics2D g2) {
         g2.setColor(Color.WHITE);
         g2.drawString("Pantalla: " + screenCol + "," + screenRow, 8, 14);
@@ -987,7 +1297,6 @@ public class GamePanel extends JPanel {
                 return grass;
         }
     }
-
     private Color obtenerColorFallback(int tileId) {
         switch (tileId) {
             case 1:
