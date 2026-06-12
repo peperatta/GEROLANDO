@@ -11,6 +11,7 @@ import game.world.Biome;
 import game.world.Biomes;
 import items.Item;
 import game.loot.LootSystem;
+import world.map.TileRegistry;
 
 import java.util.Random;
 
@@ -145,21 +146,10 @@ public class GameEngine {
         return lootSystem;
     }
     public void actualizarBiomePorTile(int tileId) {
-        switch (tileId) {
-            case 0,1,2,3,4,5,6,7,8,9:
-                this.biomeActual = Biomes.PLAYA;
-                break;
+        Biome biomeDelTile = TileRegistry.obtenerBiome(tileId);
 
-            case 10,11,12,13,14,15,16,17,18,19:
-                this.biomeActual = Biomes.BOSQUE;
-                break;
-
-            case 20,21,22,23,24,25,26,27,28,29:
-                this.biomeActual = Biomes.CUEVA;
-                break;
-
-            default:
-                break;
+        if (biomeDelTile != null) {
+            this.biomeActual = biomeDelTile;
         }
     }
 }

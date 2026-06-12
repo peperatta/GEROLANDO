@@ -10,7 +10,9 @@ import items.*;
 import ui.battle.BattleMessageQueue;
 import ui.battle.BattleOverlayRenderer;
 import world.map.MapLoader;
+import world.map.TileDefinition;
 import world.map.TileMap;
+import world.map.TileRegistry;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -30,7 +32,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GamePanel extends JPanel {
 
@@ -154,18 +158,11 @@ public class GamePanel extends JPanel {
     // BUFFER
     // =========================
     private BufferedImage screenBuffer;
+    private Map<Integer, BufferedImage> tileImageCache;
 
     // =========================
     // SPRITES / TILES
     // =========================
-    private BufferedImage sand;
-    private BufferedImage sand2;
-    private BufferedImage sand3;
-    private BufferedImage wall;
-    private BufferedImage water;
-    private BufferedImage grass;
-    private BufferedImage stone;
-
     private BufferedImage player;
     private BufferedImage enemySprite;
     private BufferedImage battleBackground;
@@ -189,6 +186,7 @@ public class GamePanel extends JPanel {
                 INTERNAL_HEIGHT,
                 BufferedImage.TYPE_INT_ARGB
         );
+        tileImageCache = new HashMap<>();
 
         cargarMapa();
         cargarImagenes();
@@ -206,16 +204,6 @@ public class GamePanel extends JPanel {
         mapa = MapLoader.cargar("/assets/maps/overworld.txt");
     }
     private void cargarImagenes() {
-        sand = cargarImagenResource("/assets/tiles/sand.png");
-        sand2 = cargarImagenResource("/assets/tiles/sand_stone.png");
-        sand3 = cargarImagenResource("/assets/tiles/sand_shell.png");
-
-        wall = cargarImagenResource("/assets/tiles/wall.png");
-        water = cargarImagenResource("/assets/tiles/water.png");
-
-        grass = cargarImagenResource("/assets/tiles/grass.png");
-        stone = cargarImagenResource("/assets/tiles/stone.png");
-
         player = cargarImagenResource("/assets/sprites/player/gerolando.png");
     }
     private BufferedImage cargarImagenResource(String ruta) {
@@ -235,21 +223,14 @@ public class GamePanel extends JPanel {
         }
     }
     private BufferedImage cargarFondoCombate() {
-        String biomeId = engine.getBiomeActual().getId();
+        int tileActual = mapa.getTile(playerRow, playerCol);
+        String backgroundPath = TileRegistry.obtener(tileActual).getBattleBackgroundPath();
 
-        switch (biomeId) {
-            case "playa":
-                return cargarImagenResource("/assets/tiles/backgrounds/playa.png");
-
-            case "bosque":
-                return cargarImagenResource("/assets/tiles/backgrounds/bosque.png");
-
-            case "cueva":
-                return cargarImagenResource("/assets/tiles/backgrounds/cueva.png");
-
-            default:
-                return null;
+        if (backgroundPath == null) {
+            return null;
         }
+
+        return cargarImagenResource(backgroundPath);
     }
 
     // =========================
@@ -1234,7 +1215,8 @@ public class GamePanel extends JPanel {
         }
     }
     private void dibujarTile(Graphics2D g2, int tileId, int screenCol, int screenRow) {
-        BufferedImage img = obtenerImagenTile(tileId);
+        TileDefinition tile = TileRegistry.obtener(tileId);
+        BufferedImage img = obtenerImagenTile(tile);
 
         int x = screenCol * TILE_SIZE;
         int y = screenRow * TILE_SIZE;
@@ -1244,7 +1226,7 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        g2.setColor(obtenerColorFallback(tileId));
+        g2.setColor(tile.getFallbackColor());
         g2.fillRect(x, y, TILE_SIZE, TILE_SIZE);
     }
     private void dibujarJugador(Graphics2D g2) {
@@ -1270,50 +1252,18 @@ public class GamePanel extends JPanel {
     // =========================
     // TILE HELPERS
     // =========================
-    private BufferedImage obtenerImagenTile(int tileId) {
-        switch (tileId) {
-            case 1:
-                return wall;
-
-            case 2:
-                return water;
-
-            case 0:
-                return sand;
-
-            case 3:
-                return sand2;
-
-            case 4:
-                return sand3;
-
-            case 10:
-                return grass;
-
-            case 20:
-                return stone;
-
-            default:
-                return grass;
+    private BufferedImage obtenerImagenTile(TileDefinition tile) {
+        if (tileImageCache.containsKey(tile.getId())) {
+            return tileImageCache.get(tile.getId());
         }
-    }
-    private Color obtenerColorFallback(int tileId) {
-        switch (tileId) {
-            case 1:
-                return Color.DARK_GRAY;
 
-            case 2:
-                return Color.BLUE;
+        BufferedImage imagen = null;
 
-            case 3:
-                return Color.GREEN;
-
-            case 4:
-                return Color.GRAY;
-
-            case 0:
-            default:
-                return new Color(50, 150, 70);
+        if (tile.getTexturePath() != null) {
+            imagen = cargarImagenResource(tile.getTexturePath());
         }
+
+        tileImageCache.put(tile.getId(), imagen);
+        return imagen;
     }
 }
